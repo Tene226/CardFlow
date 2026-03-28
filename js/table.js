@@ -14,9 +14,9 @@
    Ajouter une nouvelle table = ajouter une entrée ici.
 ──────────────────────────────────────────────────────────────────── */
 const VIEWS_CFG = {
-  today:   { tbody: 'bd-td', pager: 'pg-td', rc: 'rc-td',  rowFn: rowToday   },
-  statuts: { tbody: 'bd-st', pager: 'pg-st', rc: 'rc-st',  rowFn: rowStatuts },
-  journal: { tbody: 'bd-jn', pager: 'pg-jn', rc: 'rc-jn',  rowFn: rowJournal },
+  today:   { tbody: 'bd-td', pager: 'pg-td', rc: 'rc-td',  rowFn: r => rowToday(r)   },
+  statuts: { tbody: 'bd-st', pager: 'pg-st', rc: 'rc-st',  rowFn: r => rowStatuts(r) },
+  journal: { tbody: 'bd-jn', pager: 'pg-jn', rc: 'rc-jn',  rowFn: r => rowJournal(r) },
 };
 
 /* ── Getters de colonnes ─────────────────────────────────────────────
