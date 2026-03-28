@@ -32,6 +32,109 @@
 }
 
 /* ═══════════════════════════════════════════════════
+   VARIABLES — Dark Theme
+════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg:       #070d1a;
+  --bg2:      #0c1526;
+  --bg3:      #111d30;
+  --b:        rgba(60,120,200,.14);
+  --b2:       rgba(60,120,200,.28);
+  --white:    #dce8f5;
+  --sub:      #4e6a8c;
+  --sub2:     #7a99be;
+  --blue:     #3b82f6;
+  --blue-d:   rgba(59,130,246,.13);
+  --cyan:     #06b6d4;
+  --cyan-d:   rgba(6,182,212,.12);
+  --green:    #10b981;
+  --green-d:  rgba(16,185,129,.12);
+  --red:      #f43f5e;
+  --red-d:    rgba(244,63,94,.12);
+  --amber:    #f59e0b;
+  --amber-d:  rgba(245,158,11,.12);
+  --gold:     #f0b429;
+  --purple:   #8b5cf6;
+  --purple-d: rgba(139,92,246,.12);
+  --indigo:   #6366f1;
+  --navy:     #dce8f5;
+}
+
+/* Adaptations dark pour les composants qui ont des couleurs hard-codées */
+[data-theme="dark"] .card,
+[data-theme="dark"] .kpi,
+[data-theme="dark"] .kpi-global,
+[data-theme="dark"] .statut-card,
+[data-theme="dark"] .tl-hdr,
+[data-theme="dark"] .tl-box,
+[data-theme="dark"] .date-bar,
+[data-theme="dark"] .import-info,
+[data-theme="dark"] .anomaly-card {
+  border-color: var(--b);
+}
+
+[data-theme="dark"] .upload-zone        { background: var(--bg2); border-color: var(--b2); }
+[data-theme="dark"] .upload-zone:hover  { background: var(--bg3); border-color: var(--blue); }
+[data-theme="dark"] .upload-zone.loaded { background: var(--bg3); border-color: var(--green); }
+
+[data-theme="dark"] .ptabs  { background: var(--bg2); border-color: var(--b); }
+[data-theme="dark"] .ptab.active {
+  background: linear-gradient(135deg, rgba(30,58,138,.7), rgba(59,130,246,.25));
+  border-color: rgba(59,130,246,.4);
+}
+
+[data-theme="dark"] thead th           { background: var(--bg3); border-bottom-color: var(--b2); }
+[data-theme="dark"] tbody tr           { border-bottom-color: rgba(60,120,200,.08); }
+[data-theme="dark"] tbody tr:nth-child(even) { background: rgba(255,255,255,.015); }
+[data-theme="dark"] tbody tr:hover     { background: rgba(59,130,246,.06); }
+
+[data-theme="dark"] .fr input[type=text],
+[data-theme="dark"] .fr select,
+[data-theme="dark"] .fr input[type=date],
+[data-theme="dark"] .date-bar select,
+[data-theme="dark"] .tl-search input   { background: var(--bg3); border-color: var(--b); color: var(--white); }
+
+[data-theme="dark"] .pager button      { background: var(--bg3); border-color: var(--b); color: var(--sub); }
+[data-theme="dark"] .pager button.cur  { background: linear-gradient(135deg, rgba(30,58,138,.6), rgba(59,130,246,.3)); border-color: var(--blue); color: var(--white); }
+
+[data-theme="dark"] .ebtn              { background: var(--bg3); border-color: var(--b); color: var(--sub); }
+[data-theme="dark"] .reset-btn         { background: var(--bg3); border-color: var(--b); color: var(--sub); }
+[data-theme="dark"] .reset-btn:hover   { border-color: var(--red); color: var(--red); background: var(--red-d); }
+
+[data-theme="dark"] .rc                { background: var(--bg3); border-color: var(--b); }
+[data-theme="dark"] .import-info       { background: var(--bg2); }
+[data-theme="dark"] .anomaly-card      { background: var(--bg2); }
+[data-theme="dark"] .anomaly-card.warn { background: var(--bg2); }
+[data-theme="dark"] .kpi-global        { background: var(--bg2); }
+[data-theme="dark"] .upload-steps .step-num { background: var(--blue); }
+[data-theme="dark"] .tl-dot            { border-color: var(--bg2); }
+
+/* ── Bouton toggle thème ───────────────────────────── */
+.theme-toggle {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+  padding: 5px 13px;
+  color: #94A3B8;
+  font-family: var(--f);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .2s;
+  white-space: nowrap;
+}
+
+.theme-toggle:hover {
+  background: rgba(255,255,255,.12);
+  color: #E2E8F0;
+}
+
+.theme-toggle-ico { font-size: 14px; line-height: 1; }
+
+/* ═══════════════════════════════════════════════════
    RESET & BASE
 ════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
