@@ -1,6 +1,6 @@
 # CardFlow — Tableau de bord
 
-Application de suivi journalier des extractions SMARTVISTA (historique cartes VISA).
+Application de suivi journalier des extractions AMPLITUDE (historique cartes VISA).
 
 ---
 
