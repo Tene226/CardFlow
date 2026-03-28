@@ -1,0 +1,173 @@
+/**
+ * pages/stats.js
+ * Page "Statistiques" — KPIs globaux, graphiques, détection d'anomalies.
+ */
+
+function renderStats() {
+  const cards    = D.views.statuts.data;
+  const total    = cards.length;
+  const multiEvt = [...D.cards.values()].filter(c => c.events.length > 1).length;
+
+  renderStatsKPIs(cards, total, multiEvt);
+  renderStatsCharts(cards);
+  renderAnomalies();
+}
+
+function renderStatsKPIs(cards, total, multiEvt) {
+  const kpis = [
+    { v: D.rows.length.toLocaleString('fr'),              l: 'Total événements',         ac: '--blue'   },
+    { v: total.toLocaleString('fr'),                      l: 'Cartes uniques',           ac: '--cyan'   },
+    { v: D.dates.length,                                  l: "Jours d'activité",         ac: '--amber'  },
+    { v: (D.rows.length / total).toFixed(1),              l: 'Évén. moyen / carte',      ac: '--purple' },
+    { v: multiEvt.toLocaleString('fr'),                   l: 'Cartes avec historique',   ac: '--indigo', d: '> 1 événement' },
+    { v: cnt(cards, 'statut', 'Carte activé').toLocaleString('fr'),   l: 'Activées',     ac: '--green'  },
+    { v: cnt(cards, 'statut', 'Carte Annulée').toLocaleString('fr'),  l: 'Annulées',     ac: '--red'    },
+    { v: cnt(cards, 'statut', 'Carte Expirée').toLocaleString('fr'),  l: 'Expirées',     ac: '--amber'  },
+  ];
+
+  el('kpi-stats').innerHTML = kpis
+    .map(k => `<div class="kpi" style="--ac:var(${k.ac})">
+      <div class="kpi-v">${k.v}</div>
+      <div class="kpi-l">${k.l}</div>
+      ${k.d ? `<div class="kpi-d b">${k.d}</div>` : ''}
+    </div>`)
+    .join('');
+}
+
+function renderStatsCharts(cards) {
+  // Statuts (barres horizontales)
+  const stD = Object.entries(byKey(cards, 'statut')).sort((a, b) => b[1] - a[1]);
+  mkC('ch-st-dist', {
+    type: 'bar',
+    data: {
+      labels: stD.map(([k]) => k.length > 22 ? k.slice(0, 20) + '…' : k),
+      datasets: [{
+        data: stD.map(([, v]) => v),
+        backgroundColor: stD.map(([k]) => (SC[k] || [PAL[0]])[0]),
+        borderWidth: 0,
+        borderRadius: 4,
+      }],
+    },
+    options: { ...CD, indexAxis: 'y' },
+  });
+
+  // Types de carte (doughnut)
+  const tyD = Object.entries(byKey(cards, 'libelle')).sort((a, b) => b[1] - a[1]);
+  mkC('ch-ty-dist', {
+    type: 'doughnut',
+    data: {
+      labels: tyD.map(([k]) => k.trim().slice(0, 28)),
+      datasets: [{
+        data: tyD.map(([, v]) => v),
+        backgroundColor: PAL.slice(0, tyD.length),
+        borderWidth: 0,
+      }],
+    },
+    options: {
+      ...CD,
+      cutout: '58%',
+      plugins: {
+        ...CD.plugins,
+        legend: { display: true, position: 'right', labels: { color: '#4e6a8c', font: { size: 10 }, boxWidth: 10, padding: 6 } },
+      },
+    },
+  });
+
+  // Timeline globale (courbe)
+  const dtC  = byKey(D.rows, 'date_d');
+  const dtS  = [...D.dates].reverse().map(d => ({ d, v: dtC[d] || 0 }));
+  mkC('ch-tl-gl', {
+    type: 'line',
+    data: {
+      labels: dtS.map(x => x.d.replace(/\//g, '-')),
+      datasets: [{
+        label: 'Actions',
+        data: dtS.map(x => x.v),
+        borderColor:     '#f0b429',
+        backgroundColor: 'rgba(240,180,41,.08)',
+        borderWidth: 2,
+        pointRadius: 2,
+        tension: .3,
+        fill: true,
+      }],
+    },
+    options: { ...CD },
+  });
+
+  // Opérateurs (UTI_ACTION)
+  const utiD = Object.entries(byKey(D.rows, 'uti'))
+    .filter(([k]) => k)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 15);
+
+  mkC('ch-uti', {
+    type: 'bar',
+    data: {
+      labels: utiD.map(([k]) => k),
+      datasets: [{
+        data: utiD.map(([, v]) => v),
+        backgroundColor: 'rgba(99,102,241,.55)',
+        borderColor:     '#6366f1',
+        borderWidth: 1,
+        borderRadius: 4,
+      }],
+    },
+    options: { ...CD },
+  });
+
+  // Top agences par volume
+  const agD = Object.entries(byKey(cards, 'agence')).sort((a, b) => b[1] - a[1]).slice(0, 15);
+  mkC('ch-ag-vol', {
+    type: 'bar',
+    data: {
+      labels: agD.map(([k]) => k),
+      datasets: [{
+        data: agD.map(([, v]) => v),
+        backgroundColor: 'rgba(6,182,212,.5)',
+        borderColor:     '#06b6d4',
+        borderWidth: 1,
+        borderRadius: 4,
+      }],
+    },
+    options: { ...CD },
+  });
+}
+
+/** Détecte les cartes avec ≥ 3 rejets de fabrication (anomalie opérationnelle). */
+function renderAnomalies() {
+  const anomalies = [];
+
+  for (const [ref, c] of D.cards) {
+    const rejets = c.events.filter(e => e.action === 'Demande fabrication rejetée').length;
+    if (rejets >= 3) {
+      anomalies.push({ ref, nom: c.last.embossage, rejets, statut: c.last.statut });
+    }
+  }
+
+  anomalies.sort((a, b) => b.rejets - a.rejets);
+
+  if (!anomalies.length) {
+    el('anomaly-list').innerHTML =
+      '<div style="color:var(--sub);padding:20px 0;text-align:center;font-size:12px">Aucune anomalie détectée</div>';
+    return;
+  }
+
+  el('anomaly-list').innerHTML =
+    `<div style="margin-bottom:8px;font-size:11px;color:var(--amber)">⚠ ${anomalies.length} carte(s) avec ≥ 3 rejets</div>` +
+    anomalies.slice(0, 15).map(a => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;
+                  border-bottom:1px solid var(--b);cursor:pointer"
+           onclick="goTlSearch('${a.ref}')">
+        <span class="m" style="color:var(--cyan);min-width:50px">${a.ref}</span>
+        <span style="flex:1">${a.nom}</span>
+        <span style="color:var(--red);font-family:var(--m);font-size:11px">${a.rejets}× rejeté</span>
+        ${bdg(a.statut)}
+      </div>`).join('');
+}
+
+/** Navigue vers l'onglet Historique et lance la recherche pour cette carte. */
+function goTlSearch(ref) {
+  goPage('p-tl', document.querySelectorAll('.ptab')[3]);
+  el('tl-q').value = ref;
+  searchCard();
+}

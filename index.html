@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CardFlow — Tableau de bord</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+
+  <!-- Librairies externes -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-left">
+    <div class="nav-logo">CardFlow</div>
+    <div>
+      <div class="nav-title">Tableau de Bord — Historique Cartes VISA</div>
+      <div class="nav-sub">Extraction SMARTVISTA · Fichier unique</div>
+    </div>
+  </div>
+  <div class="nav-pill" id="nav-pill">
+    <div class="nav-dot"></div>
+    <span id="nav-txt">En attente du fichier</span>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════
+     CONTENU PRINCIPAL
+════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- UPLOAD -->
+  <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-in').click()">
+    <input type="file" id="file-in" accept=".xlsx,.xls" onchange="loadFile(this)"/>
+    <div class="upload-ico">📂</div>
+    <div class="upload-lbl">Cliquer pour charger votre extraction SMARTVISTA</div>
+    <div class="upload-sub">Fichier XLSX exporté depuis SMARTVISTA</div>
+    <div class="upload-fname" id="upload-fname">Aucun fichier sélectionné</div>
+  </div>
+
+  <div id="ld"><div class="sp"></div>Analyse en cours…</div>
+
+  <!-- VUES (masquées jusqu'au chargement) -->
+  <div id="views">
+
+    <!-- Bannière récapitulative -->
+    <div class="banner" id="banner"></div>
+
+    <!-- Onglets de navigation -->
+    <div class="ptabs">
+      <div class="ptab active" onclick="goPage('p-today',this)">📅 Activité du jour</div>
+      <div class="ptab" onclick="goPage('p-statuts',this)">📋 Statuts actuels</div>
+      <div class="ptab" onclick="goPage('p-journal',this)">📜 Journal complet</div>
+      <div class="ptab" onclick="goPage('p-tl',this)">🔍 Historique carte</div>
+      <div class="ptab" onclick="goPage('p-stats',this)">📊 Statistiques</div>
+    </div>
+
+    <!-- ── PAGE 1 : ACTIVITÉ DU JOUR ── -->
+    <div class="page active" id="p-today">
+      <div class="date-bar">
+        <label>Date</label>
+        <select id="sel-date" onchange="renderToday()"></select>
+        <span class="rc" id="today-cnt">—</span>
+      </div>
+      <div class="kpi-row" id="kpi-today"></div>
+      <div class="g2">
+        <div class="card"><div class="sl">Actions du jour</div><div class="ch"><canvas id="ch-td-act"></canvas></div></div>
+        <div class="card"><div class="sl">Agences actives</div><div class="ch"><canvas id="ch-td-ag"></canvas></div></div>
+      </div>
+      <div class="card g1">
+        <div class="sl">Détail des événements</div>
+        <div class="fr">
+          <input type="text" id="f-td-q" placeholder="🔍 Réf., compte, PAN, titulaire…" oninput="debounce(applyToday,250)"/>
+          <select id="f-td-act" onchange="applyToday()"><option value="">Toutes actions</option></select>
+          <select id="f-td-ag"  onchange="applyToday()"><option value="">Toutes agences</option></select>
+          <button class="ebtn" onclick="exportPage('today')">⬇ CSV</button>
+          <div class="rc" id="rc-td">—</div>
+        </div>
+        <div class="tw">
+          <table>
+            <thead><tr>
+              <th onclick="sortView('today',0)">Agence</th>
+              <th onclick="sortView('today',1)">Compte</th>
+              <th onclick="sortView('today',2)">Réf.</th>
+              <th onclick="sortView('today',3)">PAN</th>
+              <th onclick="sortView('today',4)">Titulaire</th>
+              <th onclick="sortView('today',5)">Type</th>
+              <th onclick="sortView('today',6)">Action</th>
+              <th onclick="sortView('today',7)">Statut actuel</th>
+              <th onclick="sortView('today',8)">Heure</th>
+              <th onclick="sortView('today',9)">Opérateur</th>
+            </tr></thead>
+            <tbody id="bd-td"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="pg-td"></div>
+      </div>
+    </div>
+
+    <!-- ── PAGE 2 : STATUTS ACTUELS ── -->
+    <div class="page" id="p-statuts">
+      <div class="sl">Cliquer sur un statut pour filtrer</div>
+      <div class="statut-grid" id="statut-grid"></div>
+      <div class="card">
+        <div class="fr">
+          <input type="text" id="f-st-q" placeholder="🔍 Réf., compte, PAN, titulaire…" oninput="debounce(applyStatuts,250)"/>
+          <select id="f-st-ag"  onchange="applyStatuts()"><option value="">Toutes agences</option></select>
+          <select id="f-st-lib" onchange="applyStatuts()"><option value="">Tous types</option></select>
+          <button class="ebtn" onclick="exportPage('statuts')">⬇ CSV</button>
+          <div class="rc" id="rc-st">—</div>
+        </div>
+        <div class="tw">
+          <table>
+            <thead><tr>
+              <th onclick="sortView('statuts',0)">Agence</th>
+              <th onclick="sortView('statuts',1)">Compte</th>
+              <th onclick="sortView('statuts',2)">Réf.</th>
+              <th onclick="sortView('statuts',3)">PAN</th>
+              <th onclick="sortView('statuts',4)">Titulaire</th>
+              <th onclick="sortView('statuts',5)">Type</th>
+              <th onclick="sortView('statuts',6)">Statut actuel</th>
+              <th onclick="sortView('statuts',7)">Statut prochain</th>
+              <th onclick="sortView('statuts',8)">Dernière action</th>
+              <th onclick="sortView('statuts',9)">Date</th>
+              <th onclick="sortView('statuts',10)">Opérateur</th>
+              <th onclick="sortView('statuts',11)">Expir.</th>
+            </tr></thead>
+            <tbody id="bd-st"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="pg-st"></div>
+      </div>
+    </div>
+
+    <!-- ── PAGE 3 : JOURNAL ── -->
+    <div class="page" id="p-journal">
+      <div class="card">
+        <div class="fr">
+          <input type="text" id="f-jn-q" placeholder="🔍 Réf., compte, PAN, titulaire, agence…" oninput="debounce(applyJournal,300)"/>
+          <select id="f-jn-act" onchange="applyJournal()"><option value="">Toutes actions</option></select>
+          <select id="f-jn-ag"  onchange="applyJournal()"><option value="">Toutes agences</option></select>
+          <select id="f-jn-uti" onchange="applyJournal()"><option value="">Tous opérateurs</option></select>
+          <input type="date" id="f-jn-d1" onchange="applyJournal()" title="Depuis"/>
+          <input type="date" id="f-jn-d2" onchange="applyJournal()" title="Jusqu'au"/>
+          <button class="ebtn" onclick="exportPage('journal')">⬇ CSV</button>
+          <div class="rc" id="rc-jn">—</div>
+        </div>
+        <div class="tw">
+          <table>
+            <thead><tr>
+              <th onclick="sortView('journal',0)">Date</th>
+              <th onclick="sortView('journal',1)">Heure</th>
+              <th onclick="sortView('journal',2)">Agence</th>
+              <th onclick="sortView('journal',3)">Compte</th>
+              <th onclick="sortView('journal',4)">Réf.</th>
+              <th onclick="sortView('journal',5)">PAN</th>
+              <th onclick="sortView('journal',6)">Titulaire</th>
+              <th onclick="sortView('journal',7)">Type</th>
+              <th onclick="sortView('journal',8)">Action</th>
+              <th onclick="sortView('journal',9)">Statut actuel</th>
+              <th onclick="sortView('journal',10)">Opérateur</th>
+            </tr></thead>
+            <tbody id="bd-jn"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="pg-jn"></div>
+      </div>
+    </div>
+
+    <!-- ── PAGE 4 : HISTORIQUE CARTE ── -->
+    <div class="page" id="p-tl">
+      <div class="tl-search">
+        <input id="tl-q" placeholder="Réf. carte, numéro de compte, PAN masqué ou nom du titulaire…"
+               onkeydown="if(event.key==='Enter')searchCard()"/>
+        <button onclick="searchCard()">Rechercher</button>
+      </div>
+      <div id="tl-multi" style="display:none">
+        <div class="sl">Plusieurs résultats — sélectionner</div>
+        <div class="tw">
+          <table>
+            <thead><tr>
+              <th>Agence</th><th>Compte</th><th>Réf.</th><th>PAN</th>
+              <th>Titulaire</th><th>Type</th><th>Statut actuel</th><th>Nb événements</th>
+            </tr></thead>
+            <tbody id="bd-multi"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="tl-result" style="display:none">
+        <div class="tl-hdr" id="tl-hdr"></div>
+        <div class="sl">Chronologie</div>
+        <div id="tl-wrap"></div>
+      </div>
+      <div id="tl-empty" style="display:none;color:var(--sub);padding:40px;text-align:center">
+        Aucun résultat.
+      </div>
+    </div>
+
+    <!-- ── PAGE 5 : STATISTIQUES ── -->
+    <div class="page" id="p-stats">
+      <div class="kpi-row" id="kpi-stats"></div>
+      <div class="g2">
+        <div class="card"><div class="sl">Statuts actuels</div><div class="ch tall"><canvas id="ch-st-dist"></canvas></div></div>
+        <div class="card"><div class="sl">Types de carte</div><div class="ch tall"><canvas id="ch-ty-dist"></canvas></div></div>
+      </div>
+      <div class="card g1"><div class="sl">Volume d'actions par jour</div><div class="ch tall"><canvas id="ch-tl-gl"></canvas></div></div>
+      <div class="g2">
+        <div class="card"><div class="sl">Actions par opérateur (UTI_ACTION)</div><div class="ch"><canvas id="ch-uti"></canvas></div></div>
+        <div class="card"><div class="sl">Top agences — volume cartes</div><div class="ch"><canvas id="ch-ag-vol"></canvas></div></div>
+      </div>
+      <div class="card g1">
+        <div class="sl">Anomalies — cartes avec ≥ 3 rejets de fabrication</div>
+        <div id="anomaly-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /views -->
+</main>
+
+<!-- ═══════════════════════════════════════════════════
+     SCRIPTS (ordre de chargement important)
+════════════════════════════════════════════════════ -->
+<script src="js/config.js"></script>
+<script src="js/state.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/loader.js"></script>
+<script src="js/table.js"></script>
+<script src="js/export.js"></script>
+<script src="js/pages/today.js"></script>
+<script src="js/pages/statuts.js"></script>
+<script src="js/pages/journal.js"></script>
+<script src="js/pages/timeline.js"></script>
+<script src="js/pages/stats.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
