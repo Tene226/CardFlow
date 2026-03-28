@@ -4,9 +4,9 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <meta name="description" content="CardFlow — Tableau de bord pour le suivi des extractions AMPLITUDE (historique cartes VISA)"/>
-  <meta name="theme-color" content="#3b82f6"/>
-  <title>CardFlow — Tableau de bord</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💳</text></svg>"/>
+  <meta name="theme-color" content="#991B1B"/>
+  <title>CardFlow — Pilotage Cartes VISA</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23991B1B' stroke-width='2'><rect x='1' y='4' width='22' height='16' rx='2' ry='2'/><line x1='1' y1='10' x2='23' y2='10'/></svg>"/>
   <link rel="stylesheet" href="css/styles.css"/>
 
   <!-- Applique le thème sauvegardé avant le rendu pour éviter le flash -->
@@ -23,277 +23,517 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════
-     NAVIGATION
-════════════════════════════════════════════════════ -->
-<nav>
-  <div class="nav-left">
-    <div class="nav-logo"><span class="logo-card">Card</span><span class="logo-flow">Flow</span></div>
-    <div class="nav-divider"></div>
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════════════════════ -->
+<header class="cf-header" id="cf-header">
+
+  <!-- Brand -->
+  <div class="cf-brand">
+    <div class="cf-brand-logo">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    </div>
     <div>
-      <div class="nav-title">Tableau de Bord — Historique Cartes VISA</div>
-      <div class="nav-sub">Extraction AMPLITUDE</div>
+      <div class="cf-brand-name"><span>Card</span><strong>Flow</strong></div>
+      <div class="cf-brand-sub">Pilotage des cartes VISA</div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Changer le thème">
-      <span class="theme-toggle-ico" id="theme-ico">☀️</span>
-      <span id="theme-lbl">Clair</span>
-    </button>
+
+  <div class="cf-hdr-divider"></div>
+
+  <!-- Right actions -->
+  <div class="cf-hdr-actions">
+
+    <!-- Status pill -->
     <div class="nav-pill" id="nav-pill">
       <div class="nav-dot"></div>
       <span id="nav-txt">En attente du fichier</span>
     </div>
+
+    <!-- Import button (triggers hidden input) -->
+    <button class="cf-import-btn" id="cf-import-btn"
+            onclick="document.getElementById('file-in').click()"
+            title="Importer un fichier AMPLITUDE">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>Importer un fichier</span>
+    </button>
+
+    <!-- Date display -->
+    <div class="cf-hdr-date" id="cf-hdr-date" style="font-family:var(--m);font-size:10.5px;color:rgba(148,163,184,.5);white-space:nowrap"></div>
+
+    <!-- Theme toggle -->
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Changer le thème">
+      <span class="theme-toggle-ico" id="theme-ico">☀️</span>
+      <span id="theme-lbl">Clair</span>
+    </button>
+
   </div>
-</nav>
+</header>
 
-<!-- ═══════════════════════════════════════════════════
-     CONTENU PRINCIPAL
-════════════════════════════════════════════════════ -->
-<main>
 
-  <!-- Hero (hidden after load) -->
-  <div class="upload-hero" id="upload-hero">
-    <div class="upload-hero-title">CardFlow</div>
-    <div class="upload-hero-sub">Analysez vos extractions AMPLITUDE — Cartes VISA</div>
+<!-- ═══════════════════════════════════════════════════════════
+     APP SHELL
+════════════════════════════════════════════════════════════ -->
+<div class="cf-shell" id="cf-shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="cf-sidebar" id="cf-sidebar">
+    <nav class="cf-nav">
+
+      <!-- WORKSPACE -->
+      <div class="cf-nav-group">
+        <div class="cf-nav-label">Workspace</div>
+
+        <button class="cf-nav-item active" id="nav-home"
+                data-page="home" onclick="sideNav('home')">
+          <span class="cf-nav-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </span>
+          <span>Vue d'ensemble</span>
+        </button>
+
+        <button class="cf-nav-item cf-nav-data" id="nav-today"
+                data-page="p-today" onclick="sideNav('p-today')">
+          <span class="cf-nav-icon">
+            <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </span>
+          <span>Activité du jour</span>
+        </button>
+
+        <button class="cf-nav-item cf-nav-data" id="nav-statuts"
+                data-page="p-statuts" onclick="sideNav('p-statuts')">
+          <span class="cf-nav-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </span>
+          <span>Statuts actuels</span>
+        </button>
+
+        <button class="cf-nav-item cf-nav-data" id="nav-journal"
+                data-page="p-journal" onclick="sideNav('p-journal')">
+          <span class="cf-nav-icon">
+            <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </span>
+          <span>Journal complet</span>
+        </button>
+
+        <button class="cf-nav-item cf-nav-data" id="nav-tl"
+                data-page="p-tl" onclick="sideNav('p-tl')">
+          <span class="cf-nav-icon">
+            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </span>
+          <span>Historique carte</span>
+        </button>
+
+        <button class="cf-nav-item cf-nav-data" id="nav-stats"
+                data-page="p-stats" onclick="sideNav('p-stats')">
+          <span class="cf-nav-icon">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </span>
+          <span>Statistiques</span>
+        </button>
+      </div>
+
+      <!-- OUTILS -->
+      <div class="cf-nav-group">
+        <div class="cf-nav-label">Outils</div>
+
+        <button class="cf-nav-item cf-nav-data" onclick="exportCurrentPage()"
+                title="Exporter la vue courante en XLSX">
+          <span class="cf-nav-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </span>
+          <span>Exporter XLSX</span>
+        </button>
+
+        <button class="cf-nav-item" onclick="document.getElementById('file-in').click()"
+                title="Charger un nouveau fichier">
+          <span class="cf-nav-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </span>
+          <span>Charger fichier</span>
+        </button>
+      </div>
+
+    </nav>
+
+    <div class="cf-sidebar-footer">CardFlow &nbsp;·&nbsp; v1.0</div>
+  </aside>
+
+  <!-- Overlay for mobile -->
+  <div class="cf-sidebar-overlay" id="cf-sidebar-overlay"
+       onclick="closeSidebar()"></div>
+
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="cf-main" id="cf-main">
+
+    <!-- ─────────────────────────────
+         ÉTAT INITIAL — avant chargement
+    ────────────────────────────────── -->
+    <div class="upload-hero" id="upload-hero">
+      <div class="upload-hero-eyebrow">Bienvenue sur</div>
+      <div class="upload-hero-title">CardFlow</div>
+      <div class="upload-hero-sub">Analysez vos extractions AMPLITUDE<br>Historique et pilotage des cartes VISA</div>
+    </div>
+
+    <!-- Zone de dépôt -->
+    <div class="upload-zone" id="upload-zone"
+         ondragover="event.preventDefault();this.classList.add('drag-over')"
+         ondragleave="this.classList.remove('drag-over')"
+         ondrop="handleDrop(event)"
+         onclick="document.getElementById('file-in').click()">
+      <input type="file" id="file-in" accept=".xlsx,.xls" onchange="loadFile(this)"/>
+      <div class="upload-zone-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <div class="upload-lbl">Glissez votre fichier ici</div>
+      <div class="upload-sub">ou cliquez pour parcourir</div>
+      <button class="upload-btn" type="button"
+              onclick="event.stopPropagation();document.getElementById('file-in').click()">
+        Sélectionner un fichier AMPLITUDE
+      </button>
+      <div class="upload-fname" id="upload-fname">Formats acceptés : .xlsx, .xls · Extraction AMPLITUDE</div>
+    </div>
+
+    <!-- Guide 3 étapes -->
+    <div class="upload-steps" id="upload-steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <div class="step-title">Exporter depuis AMPLITUDE</div>
+        <div class="step-desc">Générez votre extraction XLSX depuis le module Cartes VISA</div>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <div class="step-title">Charger dans CardFlow</div>
+        <div class="step-desc">Glissez-déposez le fichier ou cliquez pour le sélectionner</div>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <div class="step-title">Analyser les données</div>
+        <div class="step-desc">Consultez les indicateurs, statuts, anomalies et historiques</div>
+      </div>
+    </div>
+
+    <!-- Panel traçabilité import (visible après chargement) -->
+    <div id="import-info" style="display:none"></div>
+
+    <!-- Loader -->
+    <div id="ld"><div class="sp"></div>Analyse en cours…</div>
+
+    <!-- ─────────────────────────────
+         VUES — après chargement
+    ────────────────────────────────── -->
+    <div id="views">
+
+      <!-- KPI globaux (bandeau persistant) -->
+      <div id="banner"></div>
+
+      <!-- Onglets conservés dans le DOM pour la logique JS — navigation via sidebar -->
+      <div class="ptabs">
+        <div class="ptab active" onclick="goPage('p-today',this)">Activité du jour</div>
+        <div class="ptab" onclick="goPage('p-statuts',this)">Statuts actuels</div>
+        <div class="ptab" onclick="goPage('p-journal',this)">Journal complet</div>
+        <div class="ptab" onclick="goPage('p-tl',this)">Historique carte</div>
+        <div class="ptab" onclick="goPage('p-stats',this)">Statistiques</div>
+      </div>
+
+      <!-- ── PAGE 0 : OVERVIEW (home post-load) ── -->
+      <div class="page" id="p-overview">
+        <div class="cf-page-head">
+          <div class="cf-page-head-left">
+            <div class="cf-page-head-title">Vue d'ensemble</div>
+            <div class="cf-page-head-sub">Résumé des indicateurs clés du fichier chargé</div>
+          </div>
+        </div>
+        <div class="overview-card">
+          <div class="overview-card-icon">💳</div>
+          <div>
+            <div class="overview-card-title">Données chargées avec succès</div>
+            <div class="overview-card-sub">Utilisez le menu de navigation à gauche pour accéder aux différentes vues — activité du jour, statuts, journal, historique ou statistiques.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAGE 1 : ACTIVITÉ DU JOUR ── -->
+      <div class="page active" id="p-today">
+        <div class="cf-page-head">
+          <div class="cf-page-head-left">
+            <div class="cf-page-head-title">Activité du jour</div>
+            <div class="cf-page-head-sub">Suivi en temps réel des actions sur les cartes VISA</div>
+          </div>
+        </div>
+
+        <div class="date-bar">
+          <label>Date analysée</label>
+          <select id="sel-date" onchange="renderToday()"></select>
+          <span class="rc" id="today-cnt">—</span>
+        </div>
+
+        <div class="kpi-row" id="kpi-today"></div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="sl">Actions du jour</div>
+            <div class="ch"><canvas id="ch-td-act"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="sl">Agences actives</div>
+            <div class="ch"><canvas id="ch-td-ag"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card g1">
+          <div class="sl">Détail des événements</div>
+          <div class="fr">
+            <input type="text" id="f-td-q" placeholder="🔍 Réf., compte, PAN, titulaire…"
+                   oninput="debounce(applyToday,250)"/>
+            <select id="f-td-act" onchange="applyToday()"><option value="">Toutes actions</option></select>
+            <select id="f-td-ag"  onchange="applyToday()"><option value="">Toutes agences</option></select>
+            <button class="reset-btn" onclick="resetToday()">↺ Réinitialiser</button>
+            <button class="ebtn" onclick="exportPage('today')">⬇ XLSX</button>
+            <div class="rc" id="rc-td">—</div>
+          </div>
+          <div class="tw">
+            <table>
+              <thead><tr>
+                <th scope="col" onclick="sortView('today',0)">Agence</th>
+                <th scope="col" onclick="sortView('today',1)">Compte</th>
+                <th scope="col" onclick="sortView('today',2)">Réf.</th>
+                <th scope="col" onclick="sortView('today',3)">PAN</th>
+                <th scope="col" onclick="sortView('today',4)">Titulaire</th>
+                <th scope="col" onclick="sortView('today',5)">Type</th>
+                <th scope="col" onclick="sortView('today',6)">Action</th>
+                <th scope="col" onclick="sortView('today',7)">Statut actuel</th>
+                <th scope="col" onclick="sortView('today',8)">Heure</th>
+                <th scope="col" onclick="sortView('today',9)">Opérateur</th>
+              </tr></thead>
+              <tbody id="bd-td"></tbody>
+            </table>
+          </div>
+          <div class="pager" id="pg-td"></div>
+        </div>
+      </div>
+
+      <!-- ── PAGE 2 : STATUTS ACTUELS ── -->
+      <div class="page" id="p-statuts">
+        <div class="cf-page-head">
+          <div class="cf-page-head-left">
+            <div class="cf-page-head-title">Statuts actuels</div>
+            <div class="cf-page-head-sub">Répartition et détail des statuts en cours sur toutes les cartes</div>
+          </div>
+        </div>
+
+        <div id="statut-alert"></div>
+        <div class="sl">Répartition par statut — cliquer pour filtrer</div>
+        <div class="statut-grid" id="statut-grid"></div>
+
+        <div class="card">
+          <div class="fr">
+            <input type="text" id="f-st-q" placeholder="🔍 Réf., compte, PAN, titulaire…"
+                   oninput="debounce(applyStatuts,250)"/>
+            <select id="f-st-ag"  onchange="applyStatuts()"><option value="">Toutes agences</option></select>
+            <select id="f-st-lib" onchange="applyStatuts()"><option value="">Tous types</option></select>
+            <button class="reset-btn" onclick="resetStatuts()">↺ Réinitialiser</button>
+            <button class="ebtn" onclick="exportPage('statuts')">⬇ XLSX</button>
+            <div class="rc" id="rc-st">—</div>
+          </div>
+          <div class="tw">
+            <table>
+              <thead><tr>
+                <th scope="col" onclick="sortView('statuts',0)">Agence</th>
+                <th scope="col" onclick="sortView('statuts',1)">Compte</th>
+                <th scope="col" onclick="sortView('statuts',2)">Réf.</th>
+                <th scope="col" onclick="sortView('statuts',3)">PAN</th>
+                <th scope="col" onclick="sortView('statuts',4)">Titulaire</th>
+                <th scope="col" onclick="sortView('statuts',5)">Type</th>
+                <th scope="col" onclick="sortView('statuts',6)">Statut actuel</th>
+                <th scope="col" onclick="sortView('statuts',7)">Statut prochain</th>
+                <th scope="col" onclick="sortView('statuts',8)">Dernière action</th>
+                <th scope="col" onclick="sortView('statuts',9)">Date</th>
+                <th scope="col" onclick="sortView('statuts',10)">Opérateur</th>
+                <th scope="col" onclick="sortView('statuts',11)">Expir.</th>
+              </tr></thead>
+              <tbody id="bd-st"></tbody>
+            </table>
+          </div>
+          <div class="pager" id="pg-st"></div>
+        </div>
+      </div>
+
+      <!-- ── PAGE 3 : JOURNAL ── -->
+      <div class="page" id="p-journal">
+        <div class="cf-page-head">
+          <div class="cf-page-head-left">
+            <div class="cf-page-head-title">Journal complet</div>
+            <div class="cf-page-head-sub">Historique exhaustif de toutes les actions sur la période</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="fr">
+            <input type="text" id="f-jn-q" placeholder="🔍 Réf., compte, PAN, titulaire, agence…"
+                   oninput="debounce(applyJournal,300)"/>
+            <select id="f-jn-act" onchange="applyJournal()"><option value="">Toutes actions</option></select>
+            <select id="f-jn-ag"  onchange="applyJournal()"><option value="">Toutes agences</option></select>
+            <select id="f-jn-uti" onchange="applyJournal()"><option value="">Tous opérateurs</option></select>
+            <input type="date" id="f-jn-d1" onchange="applyJournal()" title="Depuis"/>
+            <input type="date" id="f-jn-d2" onchange="applyJournal()" title="Jusqu'au"/>
+            <button class="reset-btn" onclick="resetJournal()">↺ Réinitialiser</button>
+            <button class="ebtn" onclick="exportPage('journal')">⬇ XLSX</button>
+            <div class="rc" id="rc-jn">—</div>
+          </div>
+          <div class="tw">
+            <table>
+              <thead><tr>
+                <th scope="col" onclick="sortView('journal',0)">Date</th>
+                <th scope="col" onclick="sortView('journal',1)">Heure</th>
+                <th scope="col" onclick="sortView('journal',2)">Agence</th>
+                <th scope="col" onclick="sortView('journal',3)">Compte</th>
+                <th scope="col" onclick="sortView('journal',4)">Réf.</th>
+                <th scope="col" onclick="sortView('journal',5)">PAN</th>
+                <th scope="col" onclick="sortView('journal',6)">Titulaire</th>
+                <th scope="col" onclick="sortView('journal',7)">Type</th>
+                <th scope="col" onclick="sortView('journal',8)">Action</th>
+                <th scope="col" onclick="sortView('journal',9)">Statut actuel</th>
+                <th scope="col" onclick="sortView('journal',10)">Opérateur</th>
+              </tr></thead>
+              <tbody id="bd-jn"></tbody>
+            </table>
+          </div>
+          <div class="pager" id="pg-jn"></div>
+        </div>
+      </div>
+
+      <!-- ── PAGE 4 : HISTORIQUE CARTE ── -->
+      <div class="page" id="p-tl">
+        <div class="cf-page-head">
+          <div class="cf-page-head-left">
+            <div class="cf-page-head-title">Historique carte</div>
+            <div class="cf-page-head-sub">Recherche et chronologie complète par carte individuelle</div>
+          </div>
+        </div>
+
+        <div class="tl-search">
+          <input id="tl-q"
+                 placeholder="Réf. carte, numéro de compte, PAN masqué ou nom du titulaire…"
+                 onkeydown="if(event.key==='Enter')searchCard()"/>
+          <button onclick="searchCard()">Rechercher</button>
+        </div>
+
+        <div id="tl-hint">
+          <div class="tl-empty-state">
+            <span class="empty-ico">💳</span>
+            <div class="empty-msg">Recherche d'historique carte</div>
+            <div class="empty-sub">Entrez une référence carte, un numéro de compte, un PAN masqué ou un nom de titulaire</div>
+          </div>
+        </div>
+
+        <div id="tl-multi" style="display:none">
+          <div class="sl">Plusieurs résultats — sélectionner une carte</div>
+          <div class="tw">
+            <table>
+              <thead><tr>
+                <th scope="col">Agence</th>
+                <th scope="col">Compte</th>
+                <th scope="col">Réf.</th>
+                <th scope="col">PAN</th>
+                <th scope="col">Titulaire</th>
+                <th scope="col">Type</th>
+                <th scope="col">Statut actuel</th>
+                <th scope="col">Nb événements</th>
+              </tr></thead>
+              <tbody id="bd-multi"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tl-result" style="display:none">
+          <div class="tl-hdr" id="tl-hdr"></div>
+          <div class="sl">Chronologie</div>
+          <div id="tl-wrap"></div>
+        </div>
+
+        <div id="tl-empty" style="display:none">
+          <div class="tl-empty-state">
+            <span class="empty-ico">🔍</span>
+            <div class="empty-msg">Aucun résultat trouvé</div>
+            <div class="empty-sub">Vérifiez la référence carte, le numéro de compte, le PAN ou le nom du titulaire</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAGE 5 : STATISTIQUES ── -->
+      <div class="page" id="p-stats">
+        <div class="cf-page-head">
+          <div class="cf-page-head-left">
+            <div class="cf-page-head-title">Statistiques &amp; Anomalies</div>
+            <div class="cf-page-head-sub">Analyses globales, tendances et alertes sur le portefeuille de cartes</div>
+          </div>
+        </div>
+
+        <div class="kpi-row" id="kpi-stats"></div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="sl">Statuts actuels</div>
+            <div class="ch tall"><canvas id="ch-st-dist"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="sl">Types de carte</div>
+            <div class="ch tall"><canvas id="ch-ty-dist"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card g1">
+          <div class="sl">Volume d'actions par jour</div>
+          <div class="ch tall"><canvas id="ch-tl-gl"></canvas></div>
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="sl">Actions par opérateur</div>
+            <div class="ch"><canvas id="ch-uti"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="sl">Top agences — volume cartes</div>
+            <div class="ch"><canvas id="ch-ag-vol"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card g1">
+          <div class="sl">Anomalies — cartes avec ≥ 3 rejets de fabrication</div>
+          <div id="anomaly-list"></div>
+        </div>
+      </div>
+
+    </div><!-- /views -->
+  </main><!-- /cf-main -->
+
+</div><!-- /cf-shell -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════════════ -->
+<footer class="cf-footer" id="cf-footer">
+  <div>CardFlow &nbsp;·&nbsp; Outil de pilotage des cartes VISA &nbsp;·&nbsp; <span id="cf-date-footer"></span></div>
+  <div class="cf-footer-right">
+    <span>Données traitées localement</span>
+    <span>·</span>
+    <span>Aucune transmission réseau</span>
+    <span>·</span>
+    <span>v1.0</span>
   </div>
+</footer>
 
-  <!-- Upload zone — keep id="upload-zone", add drag events -->
-  <div class="upload-zone" id="upload-zone"
-       ondragover="event.preventDefault();this.classList.add('drag-over')"
-       ondragleave="this.classList.remove('drag-over')"
-       ondrop="handleDrop(event)"
-       onclick="document.getElementById('file-in').click()">
-    <input type="file" id="file-in" accept=".xlsx,.xls" onchange="loadFile(this)"/>
-    <div class="upload-ico">📂</div>
-    <div class="upload-lbl">Glissez votre fichier ici</div>
-    <div class="upload-sub">ou cliquez pour parcourir</div>
-    <button class="upload-btn" type="button" onclick="event.stopPropagation();document.getElementById('file-in').click()">Sélectionner un fichier</button>
-    <div class="upload-fname" id="upload-fname">Formats acceptés : .xlsx, .xls · Extraction AMPLITUDE</div>
-  </div>
 
-  <!-- 3-step guide (hidden after load) -->
-  <div class="upload-steps" id="upload-steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-ico">📤</div>
-      <div class="step-title">Exporter depuis AMPLITUDE</div>
-      <div class="step-desc">Générez votre extraction XLSX depuis le module Cartes VISA</div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-ico">📂</div>
-      <div class="step-title">Charger dans CardFlow</div>
-      <div class="step-desc">Glissez-déposez le fichier ou cliquez pour le sélectionner</div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-ico">📊</div>
-      <div class="step-title">Analyser les données</div>
-      <div class="step-desc">Consultez les indicateurs, statuts, anomalies et historiques cartes</div>
-    </div>
-  </div>
-
-  <!-- Import info (shown after successful load) -->
-  <div id="import-info" style="display:none"></div>
-
-  <div id="ld"><div class="sp"></div>Analyse en cours…</div>
-
-  <!-- VUES (masquées jusqu'au chargement) -->
-  <div id="views">
-
-    <!-- KPI globaux -->
-    <div id="banner"></div>
-
-    <!-- Onglets de navigation -->
-    <div class="ptabs">
-      <div class="ptab active" onclick="goPage('p-today',this)">Activité du jour</div>
-      <div class="ptab" onclick="goPage('p-statuts',this)">Statuts actuels</div>
-      <div class="ptab" onclick="goPage('p-journal',this)">Journal complet</div>
-      <div class="ptab" onclick="goPage('p-tl',this)">Historique carte</div>
-      <div class="ptab" onclick="goPage('p-stats',this)">Statistiques</div>
-    </div>
-
-    <!-- ── PAGE 1 : ACTIVITÉ DU JOUR ── -->
-    <div class="page active" id="p-today">
-      <div class="date-bar">
-        <label>Date</label>
-        <select id="sel-date" onchange="renderToday()"></select>
-        <span class="rc" id="today-cnt">—</span>
-      </div>
-      <div class="kpi-row" id="kpi-today"></div>
-      <div class="g2">
-        <div class="card"><div class="sl">Actions du jour</div><div class="ch"><canvas id="ch-td-act"></canvas></div></div>
-        <div class="card"><div class="sl">Agences actives</div><div class="ch"><canvas id="ch-td-ag"></canvas></div></div>
-      </div>
-      <div class="card g1">
-        <div class="sl">Détail des événements</div>
-        <div class="fr">
-          <input type="text" id="f-td-q" placeholder="🔍 Réf., compte, PAN, titulaire…" oninput="debounce(applyToday,250)"/>
-          <select id="f-td-act" onchange="applyToday()"><option value="">Toutes actions</option></select>
-          <select id="f-td-ag"  onchange="applyToday()"><option value="">Toutes agences</option></select>
-          <button class="reset-btn" onclick="resetToday()">↺ Réinitialiser</button>
-          <button class="ebtn" onclick="exportPage('today')">⬇ XLSX</button>
-          <div class="rc" id="rc-td">—</div>
-        </div>
-        <div class="tw">
-          <table>
-            <thead><tr>
-              <th scope="col" onclick="sortView('today',0)">Agence</th>
-              <th scope="col" onclick="sortView('today',1)">Compte</th>
-              <th scope="col" onclick="sortView('today',2)">Réf.</th>
-              <th scope="col" onclick="sortView('today',3)">PAN</th>
-              <th scope="col" onclick="sortView('today',4)">Titulaire</th>
-              <th scope="col" onclick="sortView('today',5)">Type</th>
-              <th scope="col" onclick="sortView('today',6)">Action</th>
-              <th scope="col" onclick="sortView('today',7)">Statut actuel</th>
-              <th scope="col" onclick="sortView('today',8)">Heure</th>
-              <th scope="col" onclick="sortView('today',9)">Opérateur</th>
-            </tr></thead>
-            <tbody id="bd-td"></tbody>
-          </table>
-        </div>
-        <div class="pager" id="pg-td"></div>
-      </div>
-    </div>
-
-    <!-- ── PAGE 2 : STATUTS ACTUELS ── -->
-    <div class="page" id="p-statuts">
-      <div id="statut-alert"></div>
-      <div class="sl">Répartition par statut — cliquer pour filtrer</div>
-      <div class="statut-grid" id="statut-grid"></div>
-      <div class="card">
-        <div class="fr">
-          <input type="text" id="f-st-q" placeholder="🔍 Réf., compte, PAN, titulaire…" oninput="debounce(applyStatuts,250)"/>
-          <select id="f-st-ag"  onchange="applyStatuts()"><option value="">Toutes agences</option></select>
-          <select id="f-st-lib" onchange="applyStatuts()"><option value="">Tous types</option></select>
-          <button class="reset-btn" onclick="resetStatuts()">↺ Réinitialiser</button>
-          <button class="ebtn" onclick="exportPage('statuts')">⬇ XLSX</button>
-          <div class="rc" id="rc-st">—</div>
-        </div>
-        <div class="tw">
-          <table>
-            <thead><tr>
-              <th scope="col" onclick="sortView('statuts',0)">Agence</th>
-              <th scope="col" onclick="sortView('statuts',1)">Compte</th>
-              <th scope="col" onclick="sortView('statuts',2)">Réf.</th>
-              <th scope="col" onclick="sortView('statuts',3)">PAN</th>
-              <th scope="col" onclick="sortView('statuts',4)">Titulaire</th>
-              <th scope="col" onclick="sortView('statuts',5)">Type</th>
-              <th scope="col" onclick="sortView('statuts',6)">Statut actuel</th>
-              <th scope="col" onclick="sortView('statuts',7)">Statut prochain</th>
-              <th scope="col" onclick="sortView('statuts',8)">Dernière action</th>
-              <th scope="col" onclick="sortView('statuts',9)">Date</th>
-              <th scope="col" onclick="sortView('statuts',10)">Opérateur</th>
-              <th scope="col" onclick="sortView('statuts',11)">Expir.</th>
-            </tr></thead>
-            <tbody id="bd-st"></tbody>
-          </table>
-        </div>
-        <div class="pager" id="pg-st"></div>
-      </div>
-    </div>
-
-    <!-- ── PAGE 3 : JOURNAL ── -->
-    <div class="page" id="p-journal">
-      <div class="card">
-        <div class="fr">
-          <input type="text" id="f-jn-q" placeholder="🔍 Réf., compte, PAN, titulaire, agence…" oninput="debounce(applyJournal,300)"/>
-          <select id="f-jn-act" onchange="applyJournal()"><option value="">Toutes actions</option></select>
-          <select id="f-jn-ag"  onchange="applyJournal()"><option value="">Toutes agences</option></select>
-          <select id="f-jn-uti" onchange="applyJournal()"><option value="">Tous opérateurs</option></select>
-          <input type="date" id="f-jn-d1" onchange="applyJournal()" title="Depuis"/>
-          <input type="date" id="f-jn-d2" onchange="applyJournal()" title="Jusqu'au"/>
-          <button class="reset-btn" onclick="resetJournal()">↺ Réinitialiser</button>
-          <button class="ebtn" onclick="exportPage('journal')">⬇ XLSX</button>
-          <div class="rc" id="rc-jn">—</div>
-        </div>
-        <div class="tw">
-          <table>
-            <thead><tr>
-              <th scope="col" onclick="sortView('journal',0)">Date</th>
-              <th scope="col" onclick="sortView('journal',1)">Heure</th>
-              <th scope="col" onclick="sortView('journal',2)">Agence</th>
-              <th scope="col" onclick="sortView('journal',3)">Compte</th>
-              <th scope="col" onclick="sortView('journal',4)">Réf.</th>
-              <th scope="col" onclick="sortView('journal',5)">PAN</th>
-              <th scope="col" onclick="sortView('journal',6)">Titulaire</th>
-              <th scope="col" onclick="sortView('journal',7)">Type</th>
-              <th scope="col" onclick="sortView('journal',8)">Action</th>
-              <th scope="col" onclick="sortView('journal',9)">Statut actuel</th>
-              <th scope="col" onclick="sortView('journal',10)">Opérateur</th>
-            </tr></thead>
-            <tbody id="bd-jn"></tbody>
-          </table>
-        </div>
-        <div class="pager" id="pg-jn"></div>
-      </div>
-    </div>
-
-    <!-- ── PAGE 4 : HISTORIQUE CARTE ── -->
-    <div class="page" id="p-tl">
-      <div class="tl-search">
-        <input id="tl-q" placeholder="Réf. carte, numéro de compte, PAN masqué ou nom du titulaire…"
-               onkeydown="if(event.key==='Enter')searchCard()"/>
-        <button onclick="searchCard()">Rechercher</button>
-      </div>
-      <div id="tl-hint">
-        <div class="tl-empty-state">
-          <span class="empty-ico">💳</span>
-          <div class="empty-msg">Recherche d'historique carte</div>
-          <div class="empty-sub">Entrez une référence carte, un numéro de compte, un PAN masqué ou un nom de titulaire</div>
-        </div>
-      </div>
-      <div id="tl-multi" style="display:none">
-        <div class="sl">Plusieurs résultats — sélectionner</div>
-        <div class="tw">
-          <table>
-            <thead><tr>
-              <th scope="col">Agence</th><th scope="col">Compte</th><th scope="col">Réf.</th><th scope="col">PAN</th>
-              <th scope="col">Titulaire</th><th scope="col">Type</th><th scope="col">Statut actuel</th><th scope="col">Nb événements</th>
-            </tr></thead>
-            <tbody id="bd-multi"></tbody>
-          </table>
-        </div>
-      </div>
-      <div id="tl-result" style="display:none">
-        <div class="tl-hdr" id="tl-hdr"></div>
-        <div class="sl">Chronologie</div>
-        <div id="tl-wrap"></div>
-      </div>
-      <div id="tl-empty" style="display:none">
-        <div class="tl-empty-state">
-          <span class="empty-ico">🔍</span>
-          <div class="empty-msg">Aucun résultat trouvé</div>
-          <div class="empty-sub">Vérifiez la référence carte, le numéro de compte, le PAN ou le nom du titulaire</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── PAGE 5 : STATISTIQUES ── -->
-    <div class="page" id="p-stats">
-      <div class="kpi-row" id="kpi-stats"></div>
-      <div class="g2">
-        <div class="card"><div class="sl">Statuts actuels</div><div class="ch tall"><canvas id="ch-st-dist"></canvas></div></div>
-        <div class="card"><div class="sl">Types de carte</div><div class="ch tall"><canvas id="ch-ty-dist"></canvas></div></div>
-      </div>
-      <div class="card g1"><div class="sl">Volume d'actions par jour</div><div class="ch tall"><canvas id="ch-tl-gl"></canvas></div></div>
-      <div class="g2">
-        <div class="card"><div class="sl">Actions par opérateur (UTI_ACTION)</div><div class="ch"><canvas id="ch-uti"></canvas></div></div>
-        <div class="card"><div class="sl">Top agences — volume cartes</div><div class="ch"><canvas id="ch-ag-vol"></canvas></div></div>
-      </div>
-      <div class="card g1">
-        <div class="sl">Anomalies — cartes avec ≥ 3 rejets de fabrication</div>
-        <div id="anomaly-list"></div>
-      </div>
-    </div>
-
-  </div><!-- /views -->
-</main>
-
-<!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════
      SCRIPTS (ordre de chargement important)
-════════════════════════════════════════════════════ -->
+════════════════════════════════════════════════════════════ -->
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>
 <script src="js/utils.js"></script>
@@ -308,9 +548,7 @@
 <script src="js/app.js"></script>
 
 <script>
-/* ── Thème clair / sombre ────────────────────────────
-   Persiste dans localStorage. Appliqué immédiatement.
-──────────────────────────────────────────────────── */
+/* ── Thème ───────────────────────────────────────────────────── */
 (function () {
   const saved = localStorage.getItem('cf-theme') || 'light';
   applyTheme(saved);
@@ -326,9 +564,83 @@ function applyTheme(theme) {
 }
 
 function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'light';
-  applyTheme(current === 'dark' ? 'light' : 'dark');
+  const cur = document.documentElement.getAttribute('data-theme') || 'light';
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
 }
+
+/* ── Sidebar navigation ─────────────────────────────────────── */
+
+/** Navigue vers une page via la sidebar */
+function sideNav(pageId) {
+  const viewsEl = document.getElementById('views');
+  if (!viewsEl || !viewsEl.classList.contains('show')) return;
+
+  if (pageId === 'home') {
+    // Vue d'ensemble — désactive toutes les pages, active overview
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+    const ov = document.getElementById('p-overview');
+    if (ov) ov.classList.add('active');
+  } else {
+    // Cherche le ptab correspondant pour compatibilité avec goPage()
+    const tab = document.querySelector('.ptab[onclick*="' + pageId + '"]');
+    goPage(pageId, tab);
+  }
+
+  // Met à jour l'état actif dans la sidebar
+  document.querySelectorAll('.cf-nav-item[data-page]').forEach(function(item) {
+    item.classList.toggle('active', item.dataset.page === pageId);
+  });
+}
+
+/** Exporte la page courante active */
+function exportCurrentPage() {
+  const pages = ['today', 'statuts', 'journal'];
+  const mapping = { 'p-today': 'today', 'p-statuts': 'statuts', 'p-journal': 'journal' };
+  const active = document.querySelector('.page.active');
+  if (!active) return;
+  const name = mapping[active.id];
+  if (name) exportPage(name);
+}
+
+/* ── Mobile sidebar ─────────────────────────────────────────── */
+function toggleSidebar() {
+  const sb = document.getElementById('cf-sidebar');
+  if (sb) sb.classList.toggle('open');
+}
+
+function closeSidebar() {
+  const sb = document.getElementById('cf-sidebar');
+  if (sb) sb.classList.remove('open');
+}
+
+/* ── Date display ───────────────────────────────────────────── */
+(function() {
+  const now = new Date();
+  const opts = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+  const str = now.toLocaleDateString('fr-FR', opts);
+  const hdr = document.getElementById('cf-hdr-date');
+  if (hdr) hdr.textContent = str;
+  const ftr = document.getElementById('cf-date-footer');
+  if (ftr) ftr.textContent = str;
+})();
+
+/* ── Déverrouillage sidebar au chargement des données ──────── */
+(function() {
+  const viewsEl = document.getElementById('views');
+  if (!viewsEl) return;
+
+  const obs = new MutationObserver(function() {
+    if (viewsEl.classList.contains('show')) {
+      document.body.dataset.loaded = 'true';
+      // Navigation automatique vers l'activité du jour
+      sideNav('p-today');
+      obs.disconnect();
+    }
+  });
+
+  obs.observe(viewsEl, { attributes: true, attributeFilter: ['class'] });
+})();
 </script>
 
 </body>
