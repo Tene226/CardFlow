@@ -30,17 +30,18 @@ function renderToday() {
 
 function renderTodayKPIs(rows) {
   const kpis = [
-    { v: rows.length,                                              l: 'Actions totales',    ac: '--blue'   },
-    { v: new Set(rows.map(r => r.ref)).size,                       l: 'Cartes concernées',  ac: '--cyan'   },
-    { v: cnt(rows, 'action', 'Carte activé'),                      l: 'Activations',        ac: '--green'  },
-    { v: cnt(rows, 'action', 'Carte Annulée'),                     l: 'Annulations',        ac: '--red'    },
-    { v: cnt(rows, 'action', 'Carte fabriqué'),                    l: 'Fabrications',       ac: '--cyan'   },
-    { v: cnt(rows, 'action', 'Carte en agence'),                   l: 'En agence',          ac: '--purple' },
-    { v: cnt(rows, 'action', 'Carte demandée'),                    l: 'Demandes',           ac: '--blue'   },
-    { v: new Set(rows.map(r => r.uti).filter(Boolean)).size,       l: 'Opérateurs actifs',  ac: '--amber'  },
+    { v: rows.length,                                              l: 'Actions totales',    ac: '--blue',   ico: '⚡' },
+    { v: new Set(rows.map(r => r.ref)).size,                       l: 'Cartes concernées',  ac: '--cyan',   ico: '💳' },
+    { v: cnt(rows, 'action', 'Carte activé'),                      l: 'Activations',        ac: '--green',  ico: '✅' },
+    { v: cnt(rows, 'action', 'Carte Annulée'),                     l: 'Annulations',        ac: '--red',    ico: '🚫' },
+    { v: cnt(rows, 'action', 'Carte fabriqué'),                    l: 'Fabrications',       ac: '--cyan',   ico: '🔧' },
+    { v: cnt(rows, 'action', 'Carte en agence'),                   l: 'En agence',          ac: '--purple', ico: '🏦' },
+    { v: cnt(rows, 'action', 'Carte demandée'),                    l: 'Demandes',           ac: '--blue',   ico: '📋' },
+    { v: new Set(rows.map(r => r.uti).filter(Boolean)).size,       l: 'Opérateurs actifs',  ac: '--amber',  ico: '👤' },
   ];
   el('kpi-today').innerHTML = kpis
     .map(k => `<div class="kpi" style="--ac:var(${k.ac})">
+      <span class="kpi-ico">${k.ico}</span>
       <div class="kpi-v">${k.v.toLocaleString('fr')}</div>
       <div class="kpi-l">${k.l}</div>
     </div>`)

@@ -15,18 +15,19 @@ function renderStats() {
 
 function renderStatsKPIs(cards, total, multiEvt) {
   const kpis = [
-    { v: D.rows.length.toLocaleString('fr'),              l: 'Total événements',         ac: '--blue'   },
-    { v: total.toLocaleString('fr'),                      l: 'Cartes uniques',           ac: '--cyan'   },
-    { v: D.dates.length,                                  l: "Jours d'activité",         ac: '--amber'  },
-    { v: (D.rows.length / total).toFixed(1),              l: 'Évén. moyen / carte',      ac: '--purple' },
-    { v: multiEvt.toLocaleString('fr'),                   l: 'Cartes avec historique',   ac: '--indigo', d: '> 1 événement' },
-    { v: cnt(cards, 'statut', 'Carte activé').toLocaleString('fr'),   l: 'Activées',     ac: '--green'  },
-    { v: cnt(cards, 'statut', 'Carte Annulée').toLocaleString('fr'),  l: 'Annulées',     ac: '--red'    },
-    { v: cnt(cards, 'statut', 'Carte Expirée').toLocaleString('fr'),  l: 'Expirées',     ac: '--amber'  },
+    { v: D.rows.length.toLocaleString('fr'),              l: 'Total événements',         ac: '--blue',   ico: '⚡' },
+    { v: total.toLocaleString('fr'),                      l: 'Cartes uniques',           ac: '--cyan',   ico: '💳' },
+    { v: D.dates.length,                                  l: "Jours d'activité",         ac: '--amber',  ico: '📅' },
+    { v: (D.rows.length / total).toFixed(1),              l: 'Évén. moyen / carte',      ac: '--purple', ico: '📊' },
+    { v: multiEvt.toLocaleString('fr'),                   l: 'Cartes avec historique',   ac: '--indigo', ico: '🔄', d: '> 1 événement' },
+    { v: cnt(cards, 'statut', 'Carte activé').toLocaleString('fr'),   l: 'Activées',     ac: '--green',  ico: '✅' },
+    { v: cnt(cards, 'statut', 'Carte Annulée').toLocaleString('fr'),  l: 'Annulées',     ac: '--red',    ico: '🚫' },
+    { v: cnt(cards, 'statut', 'Carte Expirée').toLocaleString('fr'),  l: 'Expirées',     ac: '--amber',  ico: '⏰' },
   ];
 
   el('kpi-stats').innerHTML = kpis
     .map(k => `<div class="kpi" style="--ac:var(${k.ac})">
+      <span class="kpi-ico">${k.ico}</span>
       <div class="kpi-v">${k.v}</div>
       <div class="kpi-l">${k.l}</div>
       ${k.d ? `<div class="kpi-d b">${k.d}</div>` : ''}
