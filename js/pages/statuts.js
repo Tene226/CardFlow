@@ -14,18 +14,26 @@ function renderStatutsPage() {
   const knownCards = cards.filter(r => r.statut !== '(Non renseigné)');
   const statDist  = Object.entries(byKey(knownCards, 'statut')).sort((a, b) => b[1] - a[1]);
 
-  // Alerte pour les cartes sans statut renseigné
-  const alertHtml = nonRens.length
-    ? `<div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);
-          border-radius:9px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:var(--amber)">
-        ⚠ <b>${nonRens.length}</b> carte(s) sans statut renseigné dans le fichier source
-        <span style="margin-left:12px;color:var(--sub2);font-family:var(--m)">
-          Réf. : ${[...new Set(nonRens.map(r => r.ref))].map(r => esc(r)).join(', ')}
-        </span>
+  // Bandeau d'alerte pleine largeur au-dessus de la grille
+  el('statut-alert').innerHTML = nonRens.length
+    ? `<div style="display:flex;align-items:center;gap:12px;
+          background:rgba(217,119,6,.07);
+          border:1px solid rgba(217,119,6,.25);
+          border-left:4px solid var(--amber);
+          border-radius:8px;padding:11px 16px;margin-bottom:16px;font-size:12.5px;">
+        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+        <div>
+          <span style="color:var(--amber);font-weight:600">${nonRens.length} carte(s) sans statut renseigné</span>
+          <span style="color:var(--sub);margin-left:8px">dans le fichier source</span>
+          <span style="display:block;margin-top:3px;font-family:var(--m);font-size:11px;color:var(--sub2)">
+            Réf. : ${[...new Set(nonRens.map(r => r.ref))].slice(0, 10).map(r => esc(r)).join(' · ')
+              }${nonRens.length > 10 ? ` <span style="color:var(--sub)">+${nonRens.length - 10} autres</span>` : ''}
+          </span>
+        </div>
       </div>`
     : '';
 
-  el('statut-grid').innerHTML = alertHtml + statDist.map(([s, n]) => {
+  el('statut-grid').innerHTML = statDist.map(([s, n]) => {
     const [fg] = SC[s] || ['#4e6a8c'];
     return `<div class="statut-card" style="--ac:${fg}" data-statut="${esc(s)}">
       <div class="statut-card-v" style="color:${fg}">${n.toLocaleString('fr')}</div>
