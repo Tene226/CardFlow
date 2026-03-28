@@ -37,6 +37,23 @@ function renderPage(name) {
   const v   = D.views[name];
   const cfg = VIEWS_CFG[name];
   const total = v.filtered.length;
+
+  if (total === 0) {
+    el(cfg.tbody).innerHTML = `
+      <tr class="empty-row">
+        <td colspan="20">
+          <div class="empty-state-inner">
+            <span class="empty-ico">🔍</span>
+            <div class="empty-msg">Aucun résultat</div>
+            <div class="empty-sub">Aucun enregistrement ne correspond aux filtres appliqués</div>
+          </div>
+        </td>
+      </tr>`;
+    el(cfg.rc).textContent  = '0 enr.';
+    el(cfg.pager).innerHTML = '';
+    return;
+  }
+
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   v.page = Math.min(v.page, pages - 1);

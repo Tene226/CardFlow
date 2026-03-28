@@ -10,6 +10,7 @@ function searchCard() {
   el('tl-result').style.display = 'none';
   el('tl-empty').style.display  = 'none';
   el('tl-multi').style.display  = 'none';
+  el('tl-hint').style.display   = 'none';
 
   if (!q) return;
 

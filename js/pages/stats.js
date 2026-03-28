@@ -69,7 +69,7 @@ function renderStatsCharts(cards) {
       cutout: '58%',
       plugins: {
         ...CD.plugins,
-        legend: { display: true, position: 'right', labels: { color: '#4e6a8c', font: { size: 10 }, boxWidth: 10, padding: 6 } },
+        legend: { display: true, position: 'right', labels: { color: '#475569', font: { size: 10 }, boxWidth: 10, padding: 6 } },
       },
     },
   });
@@ -139,32 +139,61 @@ function renderAnomalies() {
   const anomalies = [];
 
   for (const [ref, c] of D.cards) {
-    const rejets = c.events.filter(e => e.action === 'Demande fabrication rejetée').length;
-    if (rejets >= 3) {
-      anomalies.push({ ref, nom: c.last.embossage, rejets, statut: c.last.statut });
+    const rejets = c.events.filter(e => e.action === 'Demande fabrication rejetée');
+    if (rejets.length >= 3) {
+      const dates = rejets.map(e => e.date_d).sort();
+      anomalies.push({
+        ref,
+        nom:       c.last.embossage,
+        agence:    c.last.agence,
+        rejets:    rejets.length,
+        dateFirst: dates[0],
+        dateLast:  dates[dates.length - 1],
+        statut:    c.last.statut,
+      });
     }
   }
 
   anomalies.sort((a, b) => b.rejets - a.rejets);
 
   if (!anomalies.length) {
-    el('anomaly-list').innerHTML =
-      '<div style="color:var(--sub);padding:20px 0;text-align:center;font-size:12px">Aucune anomalie détectée</div>';
+    el('anomaly-list').innerHTML = `
+      <div class="empty-state-inner" style="padding:40px 0">
+        <span class="empty-ico">✅</span>
+        <div class="empty-msg">Aucune anomalie détectée</div>
+        <div class="empty-sub">Aucune carte ne présente ≥ 3 rejets de fabrication</div>
+      </div>`;
     return;
   }
 
   el('anomaly-list').innerHTML =
-    `<div style="margin-bottom:8px;font-size:11px;color:var(--amber)">⚠ ${anomalies.length} carte(s) avec ≥ 3 rejets</div>` +
-    anomalies.slice(0, 15).map(a => `
-      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;
-                  border-bottom:1px solid var(--b);cursor:pointer"
-           data-ref="${esc(a.ref)}">
-        <span class="m" style="color:var(--cyan);min-width:50px">${esc(a.ref)}</span>
-        <span style="flex:1">${esc(a.nom)}</span>
-        <span style="color:var(--red);font-family:var(--m);font-size:11px">${a.rejets}× rejeté</span>
-        ${bdg(a.statut)}
-      </div>`).join('');
-  el('anomaly-list').querySelectorAll('[data-ref]').forEach(div => {
+    `<div style="margin-bottom:14px;font-size:12px;color:var(--red);font-weight:600;display:flex;align-items:center;gap:6px">
+      <span>⚠</span>
+      <span>${anomalies.length} carte(s) présentent ≥ 3 rejets de fabrication — action recommandée : vérification physique de la carte</span>
+    </div>` +
+    anomalies.slice(0, 20).map(a => {
+      const isCritique = a.rejets >= 5;
+      return `
+        <div class="anomaly-card${isCritique ? '' : ' warn'}" data-ref="${esc(a.ref)}">
+          <span class="anomaly-criticality ${isCritique ? 'critique' : 'attention'}">
+            ${isCritique ? 'Critique' : 'Attention'}
+          </span>
+          <div style="flex:1;min-width:0">
+            <div style="font-family:var(--m);font-size:12.5px;color:var(--navy,#0F172A);font-weight:600">${esc(a.ref)}</div>
+            <div style="font-size:11.5px;color:var(--sub);margin-top:2px">${esc(a.nom)} · Agence ${esc(a.agence)}</div>
+            <div style="font-size:11px;color:var(--sub2);margin-top:3px">
+              Premier rejet : <b>${fD(a.dateFirst)}</b> &nbsp;·&nbsp; Dernier : <b>${fD(a.dateLast)}</b>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-family:var(--m);font-size:18px;font-weight:700;color:${isCritique ? 'var(--red)' : 'var(--amber)'};line-height:1">${a.rejets}×</div>
+            <div style="font-size:10px;color:var(--sub2);margin-top:2px">rejet(s)</div>
+          </div>
+          <div style="flex-shrink:0">${bdg(a.statut)}</div>
+        </div>`;
+    }).join('');
+
+  el('anomaly-list').querySelectorAll('.anomaly-card[data-ref]').forEach(div => {
     div.addEventListener('click', () => goTlSearch(div.dataset.ref));
   });
 }

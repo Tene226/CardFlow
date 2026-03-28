@@ -17,35 +17,7 @@ function loadFile(inp) {
   const reader = new FileReader();
   reader.onload = e => {
     try {
-      const wb  = XLSX.read(e.target.result, { type: 'array', cellDates: true });
-      const sn  = wb.SheetNames.find(s => /export/i.test(s)) || wb.SheetNames[0];
-      const raw = XLSX.utils.sheet_to_json(wb.Sheets[sn], { defval: null });
-
-      if (!raw.length) throw new Error('Le fichier est vide ou ne contient aucune ligne de données.');
-
-      // Peuplement de l'état global
-      D.rows = raw.map(normaliseRow);
-      buildCardMap();
-      buildDateList();
-
-      // Préparation des vues paginées
-      D.views.journal.data = [...D.rows].sort((a, b) => b.date_act.localeCompare(a.date_act));
-      D.views.statuts.data = [...D.cards.values()].map(c => c.last);
-
-      // Rendu initial
-      renderBanner(file.name);
-      renderStats();
-      renderTodayPage();
-      renderStatutsPage();
-      setupJournal();
-
-      // UI
-      el('ld').style.display = 'none';
-      el('upload-zone').classList.add('loaded');
-      el('upload-fname').textContent = file.name;
-      el('views').classList.add('show');
-      el('nav-pill').classList.add('ok');
-      el('nav-txt').textContent = `${file.name} · ${D.rows.length.toLocaleString('fr')} événements`;
+      processWorkbook(e.target.result, file.name);
     } catch (err) {
       el('ld').style.display = 'none';
       el('upload-fname').textContent = '⚠ Erreur : ' + err.message;
@@ -54,6 +26,69 @@ function loadFile(inp) {
   };
 
   reader.readAsArrayBuffer(file);
+}
+
+/**
+ * Traite un ArrayBuffer XLSX et met à jour l'état global + l'UI.
+ * Utilisé par loadFile et par le fallback drag & drop.
+ */
+function processWorkbook(buffer, filename) {
+  const wb  = XLSX.read(buffer, { type: 'array', cellDates: true });
+  const sn  = wb.SheetNames.find(s => /export/i.test(s)) || wb.SheetNames[0];
+  const raw = XLSX.utils.sheet_to_json(wb.Sheets[sn], { defval: null });
+
+  if (!raw.length) throw new Error('Le fichier est vide ou ne contient aucune ligne de données.');
+
+  D.rows = raw.map(normaliseRow);
+  buildCardMap();
+  buildDateList();
+
+  D.views.journal.data = [...D.rows].sort((a, b) => b.date_act.localeCompare(a.date_act));
+  D.views.statuts.data = [...D.cards.values()].map(c => c.last);
+
+  renderBanner(filename);
+  renderStats();
+  renderTodayPage();
+  renderStatutsPage();
+  setupJournal();
+
+  // Affichage post-chargement
+  el('ld').style.display = 'none';
+  el('upload-zone').classList.add('loaded');
+  el('upload-fname').textContent = '✓ ' + filename;
+  el('views').classList.add('show');
+  el('nav-pill').classList.add('ok');
+  el('nav-txt').textContent = `${filename} · ${D.rows.length.toLocaleString('fr')} événements`;
+
+  // Masquer le guide, afficher le panel d'info
+  const hero  = el('upload-hero');
+  const steps = el('upload-steps');
+  if (hero)  hero.style.display  = 'none';
+  if (steps) steps.style.display = 'none';
+  renderImportInfo(filename, D.rows.length, D.cards.size);
+}
+
+/**
+ * Affiche le panneau de traçabilité après import.
+ */
+function renderImportInfo(filename, nbRows, nbCards) {
+  const infoEl = el('import-info');
+  if (!infoEl) return;
+  const now = new Date().toLocaleString('fr-FR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+  infoEl.style.display = 'flex';
+  infoEl.innerHTML = `
+    <span class="import-info-ico">✅</span>
+    <div class="import-info-body">
+      <div class="import-info-name">📂 ${esc(filename)}</div>
+      <div class="import-info-meta">
+        <span>⏱ Importé le ${now}</span>
+        <span>📊 ${nbRows.toLocaleString('fr')} événements lus</span>
+        <span>💳 ${nbCards.toLocaleString('fr')} cartes uniques</span>
+      </div>
+    </div>`;
 }
 
 /**
@@ -112,4 +147,43 @@ function buildCardMap() {
 function buildDateList() {
   D.dates    = [...new Set(D.rows.map(r => r.date_d))].filter(Boolean).sort().reverse();
   D.lastDate = D.dates[0] || '';
+}
+
+/**
+ * Gère le dépôt d'un fichier par glisser-déposer.
+ */
+function handleDrop(e) {
+  e.preventDefault();
+  el('upload-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  // Injecter le fichier dans l'input puis déclencher le chargement
+  try {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    const inp = el('file-in');
+    inp.files = dt.files;
+    loadFile(inp);
+  } catch (_) {
+    // Fallback si DataTransfer non disponible
+    loadFileDirect(file);
+  }
+}
+
+/**
+ * Charge directement un objet File (fallback drag & drop).
+ */
+function loadFileDirect(file) {
+  el('ld').style.display = 'block';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      processWorkbook(e.target.result, file.name);
+    } catch (err) {
+      el('ld').style.display = 'none';
+      el('upload-fname').textContent = '⚠ Erreur : ' + err.message;
+      console.error('[CardFlow] Erreur :', err);
+    }
+  };
+  reader.readAsArrayBuffer(file);
 }

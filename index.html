@@ -38,30 +38,66 @@
 ════════════════════════════════════════════════════ -->
 <main>
 
-  <!-- UPLOAD -->
-  <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-in').click()">
+  <!-- Hero (hidden after load) -->
+  <div class="upload-hero" id="upload-hero">
+    <div class="upload-hero-title">CardFlow</div>
+    <div class="upload-hero-sub">Analysez vos extractions AMPLITUDE — Cartes VISA</div>
+  </div>
+
+  <!-- Upload zone — keep id="upload-zone", add drag events -->
+  <div class="upload-zone" id="upload-zone"
+       ondragover="event.preventDefault();this.classList.add('drag-over')"
+       ondragleave="this.classList.remove('drag-over')"
+       ondrop="handleDrop(event)"
+       onclick="document.getElementById('file-in').click()">
     <input type="file" id="file-in" accept=".xlsx,.xls" onchange="loadFile(this)"/>
     <div class="upload-ico">📂</div>
-    <div class="upload-lbl">Cliquer pour charger votre extraction AMPLITUDE</div>
-    <div class="upload-sub">Fichier XLSX exporté depuis AMPLITUDE</div>
-    <div class="upload-fname" id="upload-fname">Aucun fichier sélectionné</div>
+    <div class="upload-lbl">Glissez votre fichier ici</div>
+    <div class="upload-sub">ou cliquez pour parcourir</div>
+    <button class="upload-btn" type="button" onclick="event.stopPropagation();document.getElementById('file-in').click()">Sélectionner un fichier</button>
+    <div class="upload-fname" id="upload-fname">Formats acceptés : .xlsx, .xls · Extraction AMPLITUDE</div>
   </div>
+
+  <!-- 3-step guide (hidden after load) -->
+  <div class="upload-steps" id="upload-steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-ico">📤</div>
+      <div class="step-title">Exporter depuis AMPLITUDE</div>
+      <div class="step-desc">Générez votre extraction XLSX depuis le module Cartes VISA</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-ico">📂</div>
+      <div class="step-title">Charger dans CardFlow</div>
+      <div class="step-desc">Glissez-déposez le fichier ou cliquez pour le sélectionner</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-ico">📊</div>
+      <div class="step-title">Analyser les données</div>
+      <div class="step-desc">Consultez les indicateurs, statuts, anomalies et historiques cartes</div>
+    </div>
+  </div>
+
+  <!-- Import info (shown after successful load) -->
+  <div id="import-info" style="display:none"></div>
 
   <div id="ld"><div class="sp"></div>Analyse en cours…</div>
 
   <!-- VUES (masquées jusqu'au chargement) -->
   <div id="views">
 
-    <!-- Bannière récapitulative -->
-    <div class="banner" id="banner"></div>
+    <!-- KPI globaux -->
+    <div id="banner"></div>
 
     <!-- Onglets de navigation -->
     <div class="ptabs">
-      <div class="ptab active" onclick="goPage('p-today',this)">📅 Activité du jour</div>
-      <div class="ptab" onclick="goPage('p-statuts',this)">📋 Statuts actuels</div>
-      <div class="ptab" onclick="goPage('p-journal',this)">📜 Journal complet</div>
-      <div class="ptab" onclick="goPage('p-tl',this)">🔍 Historique carte</div>
-      <div class="ptab" onclick="goPage('p-stats',this)">📊 Statistiques</div>
+      <div class="ptab active" onclick="goPage('p-today',this)">Activité du jour</div>
+      <div class="ptab" onclick="goPage('p-statuts',this)">Statuts actuels</div>
+      <div class="ptab" onclick="goPage('p-journal',this)">Journal complet</div>
+      <div class="ptab" onclick="goPage('p-tl',this)">Historique carte</div>
+      <div class="ptab" onclick="goPage('p-stats',this)">Statistiques</div>
     </div>
 
     <!-- ── PAGE 1 : ACTIVITÉ DU JOUR ── -->
@@ -82,7 +118,8 @@
           <input type="text" id="f-td-q" placeholder="🔍 Réf., compte, PAN, titulaire…" oninput="debounce(applyToday,250)"/>
           <select id="f-td-act" onchange="applyToday()"><option value="">Toutes actions</option></select>
           <select id="f-td-ag"  onchange="applyToday()"><option value="">Toutes agences</option></select>
-          <button class="ebtn" onclick="exportPage('today')">⬇ CSV</button>
+          <button class="reset-btn" onclick="resetToday()">↺ Réinitialiser</button>
+          <button class="ebtn" onclick="exportPage('today')">⬇ XLSX</button>
           <div class="rc" id="rc-td">—</div>
         </div>
         <div class="tw">
@@ -108,14 +145,15 @@
 
     <!-- ── PAGE 2 : STATUTS ACTUELS ── -->
     <div class="page" id="p-statuts">
-      <div class="sl">Cliquer sur un statut pour filtrer</div>
+      <div class="sl">Répartition par statut — cliquer pour filtrer</div>
       <div class="statut-grid" id="statut-grid"></div>
       <div class="card">
         <div class="fr">
           <input type="text" id="f-st-q" placeholder="🔍 Réf., compte, PAN, titulaire…" oninput="debounce(applyStatuts,250)"/>
           <select id="f-st-ag"  onchange="applyStatuts()"><option value="">Toutes agences</option></select>
           <select id="f-st-lib" onchange="applyStatuts()"><option value="">Tous types</option></select>
-          <button class="ebtn" onclick="exportPage('statuts')">⬇ CSV</button>
+          <button class="reset-btn" onclick="resetStatuts()">↺ Réinitialiser</button>
+          <button class="ebtn" onclick="exportPage('statuts')">⬇ XLSX</button>
           <div class="rc" id="rc-st">—</div>
         </div>
         <div class="tw">
@@ -151,7 +189,8 @@
           <select id="f-jn-uti" onchange="applyJournal()"><option value="">Tous opérateurs</option></select>
           <input type="date" id="f-jn-d1" onchange="applyJournal()" title="Depuis"/>
           <input type="date" id="f-jn-d2" onchange="applyJournal()" title="Jusqu'au"/>
-          <button class="ebtn" onclick="exportPage('journal')">⬇ CSV</button>
+          <button class="reset-btn" onclick="resetJournal()">↺ Réinitialiser</button>
+          <button class="ebtn" onclick="exportPage('journal')">⬇ XLSX</button>
           <div class="rc" id="rc-jn">—</div>
         </div>
         <div class="tw">
@@ -183,6 +222,13 @@
                onkeydown="if(event.key==='Enter')searchCard()"/>
         <button onclick="searchCard()">Rechercher</button>
       </div>
+      <div id="tl-hint">
+        <div class="tl-empty-state">
+          <span class="empty-ico">💳</span>
+          <div class="empty-msg">Recherche d'historique carte</div>
+          <div class="empty-sub">Entrez une référence carte, un numéro de compte, un PAN masqué ou un nom de titulaire</div>
+        </div>
+      </div>
       <div id="tl-multi" style="display:none">
         <div class="sl">Plusieurs résultats — sélectionner</div>
         <div class="tw">
@@ -200,8 +246,12 @@
         <div class="sl">Chronologie</div>
         <div id="tl-wrap"></div>
       </div>
-      <div id="tl-empty" style="display:none;color:var(--sub);padding:40px;text-align:center">
-        Aucun résultat.
+      <div id="tl-empty" style="display:none">
+        <div class="tl-empty-state">
+          <span class="empty-ico">🔍</span>
+          <div class="empty-msg">Aucun résultat trouvé</div>
+          <div class="empty-sub">Vérifiez la référence carte, le numéro de compte, le PAN ou le nom du titulaire</div>
+        </div>
       </div>
     </div>
 

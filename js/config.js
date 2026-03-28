@@ -39,18 +39,27 @@ const CD = {
   plugins: {
     legend: { display: false },
     tooltip: {
-      backgroundColor: '#0b1525',
-      borderColor:     'rgba(60,120,200,.25)',
+      backgroundColor: '#0F172A',
+      borderColor:     'rgba(0,0,0,.12)',
       borderWidth:     1,
-      titleColor:      '#dce8f5',
-      bodyColor:       '#7a99be',
-      titleFont: { family: 'JetBrains Mono', size: 11 },
-      bodyFont:  { family: 'JetBrains Mono', size: 11 },
+      titleColor:      '#F8FAFC',
+      bodyColor:       '#94A3B8',
+      titleFont: { family: 'Inter', size: 11 },
+      bodyFont:  { family: 'Inter', size: 11 },
+      padding: 10,
     },
   },
   scales: {
-    x: { ticks: { color: '#4e6a8c', font: { size: 10 } }, grid: { color: 'rgba(60,120,200,.07)' } },
-    y: { ticks: { color: '#4e6a8c', font: { size: 10 } }, grid: { color: 'rgba(60,120,200,.07)' } },
+    x: {
+      ticks: { color: '#475569', font: { size: 10 } },
+      grid:  { color: 'rgba(0,0,0,.05)' },
+      border:{ color: '#E2E8F0' },
+    },
+    y: {
+      ticks: { color: '#475569', font: { size: 10 } },
+      grid:  { color: 'rgba(0,0,0,.05)' },
+      border:{ color: '#E2E8F0' },
+    },
   },
 };
 
