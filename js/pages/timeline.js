@@ -38,16 +38,19 @@ function searchCard() {
 function showMultipleResults(matches) {
   el('tl-multi').style.display = 'block';
   el('bd-multi').innerHTML = matches.map(([ref, c]) => `
-    <tr style="cursor:pointer" onclick="showTimeline('${ref}')">
-      <td class="m">${c.last.agence}</td>
-      <td class="m">${c.last.compte}</td>
-      <td class="m">${ref}</td>
-      <td class="m">${c.last.pan}</td>
-      <td>${c.last.embossage}</td>
-      <td style="color:var(--sub);font-size:11px">${c.last.libelle}</td>
+    <tr style="cursor:pointer" data-ref="${esc(ref)}">
+      <td class="m">${esc(c.last.agence)}</td>
+      <td class="m">${esc(c.last.compte)}</td>
+      <td class="m">${esc(ref)}</td>
+      <td class="m">${esc(c.last.pan)}</td>
+      <td>${esc(c.last.embossage)}</td>
+      <td style="color:var(--sub);font-size:11px">${esc(c.last.libelle)}</td>
       <td>${bdg(c.last.statut)}</td>
       <td class="m" style="color:var(--cyan)">${c.events.length}</td>
     </tr>`).join('');
+  el('bd-multi').querySelectorAll('tr[data-ref]').forEach(tr => {
+    tr.addEventListener('click', () => showTimeline(tr.dataset.ref));
+  });
 }
 
 /**
@@ -69,12 +72,12 @@ function showTimeline(ref) {
 
 function renderTimelineHeader(ref, l, nbEvents) {
   el('tl-hdr').innerHTML = `
-    <div class="f"><label>Réf. Carte</label><span>${ref}</span></div>
-    <div class="f"><label>Compte</label><span>${l.compte}</span></div>
-    <div class="f"><label>Titulaire</label><span>${l.embossage}</span></div>
-    <div class="f"><label>PAN</label><span>${l.pan}</span></div>
-    <div class="f"><label>Type</label><span style="color:var(--sub2)">${l.libelle}</span></div>
-    <div class="f"><label>Agence</label><span>${l.agence}</span></div>
+    <div class="f"><label>Réf. Carte</label><span>${esc(ref)}</span></div>
+    <div class="f"><label>Compte</label><span>${esc(l.compte)}</span></div>
+    <div class="f"><label>Titulaire</label><span>${esc(l.embossage)}</span></div>
+    <div class="f"><label>PAN</label><span>${esc(l.pan)}</span></div>
+    <div class="f"><label>Type</label><span style="color:var(--sub2)">${esc(l.libelle)}</span></div>
+    <div class="f"><label>Agence</label><span>${esc(l.agence)}</span></div>
     <div class="f"><label>Statut actuel</label><span>${bdg(l.statut)}</span></div>
     <div class="f"><label>Expiration</label><span>${fDate(l.expir)}</span></div>
     <div class="f"><label>Événements</label><span style="color:var(--cyan)">${nbEvents}</span></div>`;

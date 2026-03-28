@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="CardFlow — Tableau de bord pour le suivi des extractions AMPLITUDE (historique cartes VISA)"/>
+  <meta name="theme-color" content="#3b82f6"/>
   <title>CardFlow — Tableau de bord</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💳</text></svg>"/>
   <link rel="stylesheet" href="css/styles.css"/>
 
   <!-- Librairies externes -->
@@ -85,16 +88,16 @@
         <div class="tw">
           <table>
             <thead><tr>
-              <th onclick="sortView('today',0)">Agence</th>
-              <th onclick="sortView('today',1)">Compte</th>
-              <th onclick="sortView('today',2)">Réf.</th>
-              <th onclick="sortView('today',3)">PAN</th>
-              <th onclick="sortView('today',4)">Titulaire</th>
-              <th onclick="sortView('today',5)">Type</th>
-              <th onclick="sortView('today',6)">Action</th>
-              <th onclick="sortView('today',7)">Statut actuel</th>
-              <th onclick="sortView('today',8)">Heure</th>
-              <th onclick="sortView('today',9)">Opérateur</th>
+              <th scope="col" onclick="sortView('today',0)">Agence</th>
+              <th scope="col" onclick="sortView('today',1)">Compte</th>
+              <th scope="col" onclick="sortView('today',2)">Réf.</th>
+              <th scope="col" onclick="sortView('today',3)">PAN</th>
+              <th scope="col" onclick="sortView('today',4)">Titulaire</th>
+              <th scope="col" onclick="sortView('today',5)">Type</th>
+              <th scope="col" onclick="sortView('today',6)">Action</th>
+              <th scope="col" onclick="sortView('today',7)">Statut actuel</th>
+              <th scope="col" onclick="sortView('today',8)">Heure</th>
+              <th scope="col" onclick="sortView('today',9)">Opérateur</th>
             </tr></thead>
             <tbody id="bd-td"></tbody>
           </table>
@@ -118,18 +121,18 @@
         <div class="tw">
           <table>
             <thead><tr>
-              <th onclick="sortView('statuts',0)">Agence</th>
-              <th onclick="sortView('statuts',1)">Compte</th>
-              <th onclick="sortView('statuts',2)">Réf.</th>
-              <th onclick="sortView('statuts',3)">PAN</th>
-              <th onclick="sortView('statuts',4)">Titulaire</th>
-              <th onclick="sortView('statuts',5)">Type</th>
-              <th onclick="sortView('statuts',6)">Statut actuel</th>
-              <th onclick="sortView('statuts',7)">Statut prochain</th>
-              <th onclick="sortView('statuts',8)">Dernière action</th>
-              <th onclick="sortView('statuts',9)">Date</th>
-              <th onclick="sortView('statuts',10)">Opérateur</th>
-              <th onclick="sortView('statuts',11)">Expir.</th>
+              <th scope="col" onclick="sortView('statuts',0)">Agence</th>
+              <th scope="col" onclick="sortView('statuts',1)">Compte</th>
+              <th scope="col" onclick="sortView('statuts',2)">Réf.</th>
+              <th scope="col" onclick="sortView('statuts',3)">PAN</th>
+              <th scope="col" onclick="sortView('statuts',4)">Titulaire</th>
+              <th scope="col" onclick="sortView('statuts',5)">Type</th>
+              <th scope="col" onclick="sortView('statuts',6)">Statut actuel</th>
+              <th scope="col" onclick="sortView('statuts',7)">Statut prochain</th>
+              <th scope="col" onclick="sortView('statuts',8)">Dernière action</th>
+              <th scope="col" onclick="sortView('statuts',9)">Date</th>
+              <th scope="col" onclick="sortView('statuts',10)">Opérateur</th>
+              <th scope="col" onclick="sortView('statuts',11)">Expir.</th>
             </tr></thead>
             <tbody id="bd-st"></tbody>
           </table>
@@ -154,17 +157,17 @@
         <div class="tw">
           <table>
             <thead><tr>
-              <th onclick="sortView('journal',0)">Date</th>
-              <th onclick="sortView('journal',1)">Heure</th>
-              <th onclick="sortView('journal',2)">Agence</th>
-              <th onclick="sortView('journal',3)">Compte</th>
-              <th onclick="sortView('journal',4)">Réf.</th>
-              <th onclick="sortView('journal',5)">PAN</th>
-              <th onclick="sortView('journal',6)">Titulaire</th>
-              <th onclick="sortView('journal',7)">Type</th>
-              <th onclick="sortView('journal',8)">Action</th>
-              <th onclick="sortView('journal',9)">Statut actuel</th>
-              <th onclick="sortView('journal',10)">Opérateur</th>
+              <th scope="col" onclick="sortView('journal',0)">Date</th>
+              <th scope="col" onclick="sortView('journal',1)">Heure</th>
+              <th scope="col" onclick="sortView('journal',2)">Agence</th>
+              <th scope="col" onclick="sortView('journal',3)">Compte</th>
+              <th scope="col" onclick="sortView('journal',4)">Réf.</th>
+              <th scope="col" onclick="sortView('journal',5)">PAN</th>
+              <th scope="col" onclick="sortView('journal',6)">Titulaire</th>
+              <th scope="col" onclick="sortView('journal',7)">Type</th>
+              <th scope="col" onclick="sortView('journal',8)">Action</th>
+              <th scope="col" onclick="sortView('journal',9)">Statut actuel</th>
+              <th scope="col" onclick="sortView('journal',10)">Opérateur</th>
             </tr></thead>
             <tbody id="bd-jn"></tbody>
           </table>
@@ -185,8 +188,8 @@
         <div class="tw">
           <table>
             <thead><tr>
-              <th>Agence</th><th>Compte</th><th>Réf.</th><th>PAN</th>
-              <th>Titulaire</th><th>Type</th><th>Statut actuel</th><th>Nb événements</th>
+              <th scope="col">Agence</th><th scope="col">Compte</th><th scope="col">Réf.</th><th scope="col">PAN</th>
+              <th scope="col">Titulaire</th><th scope="col">Type</th><th scope="col">Statut actuel</th><th scope="col">Nb événements</th>
             </tr></thead>
             <tbody id="bd-multi"></tbody>
           </table>

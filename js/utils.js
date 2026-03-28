@@ -9,6 +9,11 @@ function el(id) {
   return document.getElementById(id);
 }
 
+/** Échappe les caractères HTML spéciaux pour prévenir les injections XSS */
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 /** Génère un badge coloré selon le statut */
 function bdg(statut) {
   const [fg, bg] = SC[statut] || ['#4e6a8c', 'rgba(78,106,140,.15)'];

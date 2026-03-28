@@ -16,33 +16,41 @@ function loadFile(inp) {
 
   const reader = new FileReader();
   reader.onload = e => {
-    const wb  = XLSX.read(e.target.result, { type: 'array', cellDates: true });
-    const sn  = wb.SheetNames.find(s => /export/i.test(s)) || wb.SheetNames[0];
-    const raw = XLSX.utils.sheet_to_json(wb.Sheets[sn], { defval: null });
+    try {
+      const wb  = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+      const sn  = wb.SheetNames.find(s => /export/i.test(s)) || wb.SheetNames[0];
+      const raw = XLSX.utils.sheet_to_json(wb.Sheets[sn], { defval: null });
 
-    // Peuplement de l'état global
-    D.rows = raw.map(normaliseRow);
-    buildCardMap();
-    buildDateList();
+      if (!raw.length) throw new Error('Le fichier est vide ou ne contient aucune ligne de données.');
 
-    // Préparation des vues paginées
-    D.views.journal.data = [...D.rows].sort((a, b) => b.date_act.localeCompare(a.date_act));
-    D.views.statuts.data = [...D.cards.values()].map(c => c.last);
+      // Peuplement de l'état global
+      D.rows = raw.map(normaliseRow);
+      buildCardMap();
+      buildDateList();
 
-    // Rendu initial
-    renderBanner(file.name);
-    renderStats();
-    renderTodayPage();
-    renderStatutsPage();
-    setupJournal();
+      // Préparation des vues paginées
+      D.views.journal.data = [...D.rows].sort((a, b) => b.date_act.localeCompare(a.date_act));
+      D.views.statuts.data = [...D.cards.values()].map(c => c.last);
 
-    // UI
-    el('ld').style.display = 'none';
-    el('upload-zone').classList.add('loaded');
-    el('upload-fname').textContent = file.name;
-    el('views').classList.add('show');
-    el('nav-pill').classList.add('ok');
-    el('nav-txt').textContent = `${file.name} · ${D.rows.length.toLocaleString('fr')} événements`;
+      // Rendu initial
+      renderBanner(file.name);
+      renderStats();
+      renderTodayPage();
+      renderStatutsPage();
+      setupJournal();
+
+      // UI
+      el('ld').style.display = 'none';
+      el('upload-zone').classList.add('loaded');
+      el('upload-fname').textContent = file.name;
+      el('views').classList.add('show');
+      el('nav-pill').classList.add('ok');
+      el('nav-txt').textContent = `${file.name} · ${D.rows.length.toLocaleString('fr')} événements`;
+    } catch (err) {
+      el('ld').style.display = 'none';
+      el('upload-fname').textContent = '⚠ Erreur : ' + err.message;
+      console.error('[CardFlow] Erreur de chargement :', err);
+    }
   };
 
   reader.readAsArrayBuffer(file);

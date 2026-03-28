@@ -158,12 +158,15 @@ function renderAnomalies() {
     anomalies.slice(0, 15).map(a => `
       <div style="display:flex;align-items:center;gap:10px;padding:8px 0;
                   border-bottom:1px solid var(--b);cursor:pointer"
-           onclick="goTlSearch('${a.ref}')">
-        <span class="m" style="color:var(--cyan);min-width:50px">${a.ref}</span>
-        <span style="flex:1">${a.nom}</span>
+           data-ref="${esc(a.ref)}">
+        <span class="m" style="color:var(--cyan);min-width:50px">${esc(a.ref)}</span>
+        <span style="flex:1">${esc(a.nom)}</span>
         <span style="color:var(--red);font-family:var(--m);font-size:11px">${a.rejets}× rejeté</span>
         ${bdg(a.statut)}
       </div>`).join('');
+  el('anomaly-list').querySelectorAll('[data-ref]').forEach(div => {
+    div.addEventListener('click', () => goTlSearch(div.dataset.ref));
+  });
 }
 
 /** Navigue vers l'onglet Historique et lance la recherche pour cette carte. */

@@ -24,7 +24,7 @@ function renderBanner(filename) {
   const actionsJour = D.rows.filter(r => r.date_d === D.lastDate).length;
 
   el('banner').innerHTML = `
-    <span>📂 <b style="color:var(--white);font-family:var(--m)">${filename}</b></span>
+    <span>📂 <b style="color:var(--white);font-family:var(--m)">${esc(filename)}</b></span>
     <span>📊 <b style="color:var(--white)">${D.rows.length.toLocaleString('fr')}</b> événements</span>
     <span>💳 <b style="color:var(--white)">${D.cards.size.toLocaleString('fr')}</b> cartes</span>
     <span>📅 Période : <b style="color:var(--white)">${fD(D.dates[D.dates.length - 1])}</b>

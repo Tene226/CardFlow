@@ -20,21 +20,22 @@ function renderStatutsPage() {
           border-radius:9px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:var(--amber)">
         ⚠ <b>${nonRens.length}</b> carte(s) sans statut renseigné dans le fichier source
         <span style="margin-left:12px;color:var(--sub2);font-family:var(--m)">
-          Réf. : ${[...new Set(nonRens.map(r => r.ref))].join(', ')}
+          Réf. : ${[...new Set(nonRens.map(r => r.ref))].map(r => esc(r)).join(', ')}
         </span>
       </div>`
     : '';
 
   el('statut-grid').innerHTML = alertHtml + statDist.map(([s, n]) => {
     const [fg] = SC[s] || ['#4e6a8c'];
-    const safeName = s.replace(/'/g, "\\'");
-    return `<div class="statut-card" style="--ac:${fg}"
-                 onclick="toggleStatutFilter('${safeName}', this)">
+    return `<div class="statut-card" style="--ac:${fg}" data-statut="${esc(s)}">
       <div class="statut-card-v" style="color:${fg}">${n.toLocaleString('fr')}</div>
-      <div class="statut-card-l">${s}</div>
+      <div class="statut-card-l">${esc(s)}</div>
       <div class="statut-card-p">${((n / total) * 100).toFixed(1)} %</div>
     </div>`;
   }).join('');
+  el('statut-grid').querySelectorAll('.statut-card[data-statut]').forEach(card => {
+    card.addEventListener('click', () => toggleStatutFilter(card.dataset.statut, card));
+  });
 
   fillSel('f-st-ag',  uniq(cards.map(r => r.agence)).sort());
   fillSel('f-st-lib', uniq(cards.map(r => r.libelle)).sort());
