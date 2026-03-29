@@ -39,7 +39,21 @@
     </div>
   </div>
 
+  <!-- Sidebar toggle -->
+  <button class="cf-sidebar-toggle" id="cf-sb-toggle" onclick="toggleSidebar()" title="Afficher / masquer la navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
   <div class="cf-hdr-divider"></div>
+
+  <!-- Global search -->
+  <div class="cf-hdr-search">
+    <svg class="cf-hdr-search-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="hdr-search" placeholder="Rechercher une carte, un compte, un PAN…"
+           oninput="debounce(globalSearch, 300)" autocomplete="off"/>
+  </div>
 
   <!-- Right actions -->
   <div class="cf-hdr-actions">
@@ -81,8 +95,8 @@
     <nav class="cf-nav">
 
       <!-- WORKSPACE -->
-      <div class="cf-nav-group">
-        <div class="cf-nav-label">Workspace</div>
+      <div class="cf-nav-group" id="navg-workspace">
+        <button class="cf-nav-label" onclick="toggleNavGroup('navg-workspace')">Workspace<svg class="cf-nav-chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
 
         <button class="cf-nav-item active" id="nav-home"
                 data-page="home" onclick="sideNav('home')">
@@ -134,8 +148,8 @@
       </div>
 
       <!-- OUTILS -->
-      <div class="cf-nav-group">
-        <div class="cf-nav-label">Outils</div>
+      <div class="cf-nav-group" id="navg-outils">
+        <button class="cf-nav-label" onclick="toggleNavGroup('navg-outils')">Outils<svg class="cf-nav-chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
 
         <button class="cf-nav-item cf-nav-data" onclick="exportCurrentPage()"
                 title="Exporter la vue courante en XLSX">
@@ -155,6 +169,16 @@
       </div>
 
     </nav>
+
+      <div class="cf-nav-group" id="navg-systeme">
+        <button class="cf-nav-label" onclick="toggleNavGroup('navg-systeme')">Système<svg class="cf-nav-chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <button class="cf-nav-item" id="nav-settings" data-page="p-settings" onclick="sideNav('p-settings')" title="Paramètres">
+          <span class="cf-nav-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          </span>
+          <span>Paramètres</span>
+        </button>
+      </div>
 
     <div class="cf-sidebar-footer">CardFlow &nbsp;·&nbsp; v1.0</div>
   </aside>
@@ -246,16 +270,16 @@
         <div class="cf-page-head">
           <div class="cf-page-head-left">
             <div class="cf-page-head-title">Vue d'ensemble</div>
-            <div class="cf-page-head-sub">Résumé des indicateurs clés du fichier chargé</div>
+            <div class="cf-page-head-sub">Tableau de bord — indicateurs clés du portefeuille</div>
+          </div>
+          <div class="cf-page-head-right">
+            <button class="pdf-btn" onclick="exportPDF('overview')" title="Exporter en PDF">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              Exporter PDF
+            </button>
           </div>
         </div>
-        <div class="overview-card">
-          <div class="overview-card-icon">💳</div>
-          <div>
-            <div class="overview-card-title">Données chargées avec succès</div>
-            <div class="overview-card-sub">Utilisez le menu de navigation à gauche pour accéder aux différentes vues — activité du jour, statuts, journal, historique ou statistiques.</div>
-          </div>
-        </div>
+        <div id="overview-dashboard"></div>
       </div>
 
       <!-- ── PAGE 1 : ACTIVITÉ DU JOUR ── -->
@@ -264,6 +288,12 @@
           <div class="cf-page-head-left">
             <div class="cf-page-head-title">Activité du jour</div>
             <div class="cf-page-head-sub">Suivi en temps réel des actions sur les cartes VISA</div>
+          </div>
+          <div class="cf-page-head-right">
+            <button class="pdf-btn" onclick="exportPDF('today')" title="Exporter en PDF">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Exporter PDF
+            </button>
           </div>
         </div>
 
@@ -473,6 +503,12 @@
             <div class="cf-page-head-title">Statistiques &amp; Anomalies</div>
             <div class="cf-page-head-sub">Analyses globales, tendances et alertes sur le portefeuille de cartes</div>
           </div>
+          <div class="cf-page-head-right">
+            <button class="pdf-btn" onclick="exportPDF('stats')" title="Exporter en PDF">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Exporter PDF
+            </button>
+          </div>
         </div>
 
         <div class="kpi-row" id="kpi-stats"></div>
@@ -581,6 +617,9 @@ function sideNav(pageId) {
     document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
     const ov = document.getElementById('p-overview');
     if (ov) ov.classList.add('active');
+  } else if (pageId === 'p-settings') {
+    // Paramètres — not yet implemented, show overview for now
+    return;
   } else {
     // Cherche le ptab correspondant pour compatibilité avec goPage()
     const tab = document.querySelector('.ptab[onclick*="' + pageId + '"]');
@@ -614,6 +653,50 @@ function closeSidebar() {
   if (sb) sb.classList.remove('open');
 }
 
+/* ── Toggle sidebar entière ─────────────────────────────────── */
+function toggleSidebar() {
+  const sb   = document.getElementById('cf-sidebar');
+  const main = document.getElementById('cf-main');
+  const ftr  = document.querySelector('.cf-footer');
+  sb.classList.toggle('collapsed');
+  main.classList.toggle('sidebar-collapsed');
+  if (ftr) ftr.classList.toggle('sidebar-collapsed');
+  try {
+    localStorage.setItem('cf-sb-collapsed', sb.classList.contains('collapsed'));
+  } catch(_) {}
+}
+
+// Restaure l'état de la sidebar au chargement
+(function restoreSidebar() {
+  if (localStorage.getItem('cf-sb-collapsed') === 'true') {
+    document.getElementById('cf-sidebar')?.classList.add('collapsed');
+    document.getElementById('cf-main')?.classList.add('sidebar-collapsed');
+    document.querySelector('.cf-footer')?.classList.add('sidebar-collapsed');
+  }
+})();
+
+/* ── Sections sidebar repliables ────────────────────────────── */
+function toggleNavGroup(id) {
+  const g = document.getElementById(id);
+  if (!g) return;
+  g.classList.toggle('collapsed');
+  try {
+    const s = JSON.parse(localStorage.getItem('cf-nav-groups') || '{}');
+    s[id] = g.classList.contains('collapsed');
+    localStorage.setItem('cf-nav-groups', JSON.stringify(s));
+  } catch(_) {}
+}
+
+// Restaure l'état des groupes au chargement
+(function restoreNavGroups() {
+  try {
+    const s = JSON.parse(localStorage.getItem('cf-nav-groups') || '{}');
+    Object.entries(s).forEach(([id, collapsed]) => {
+      if (collapsed) document.getElementById(id)?.classList.add('collapsed');
+    });
+  } catch(_) {}
+})();
+
 /* ── Date display ───────────────────────────────────────────── */
 (function() {
   const now = new Date();
@@ -624,6 +707,52 @@ function closeSidebar() {
   const ftr = document.getElementById('cf-date-footer');
   if (ftr) ftr.textContent = str;
 })();
+
+/* ── Recherche globale header ───────────────────────────────── */
+function globalSearch() {
+  const q = (document.getElementById('hdr-search')?.value || '').trim().toLowerCase();
+  if (!q) return;
+  const viewsEl = document.getElementById('views');
+  if (!viewsEl || !viewsEl.classList.contains('show')) return;
+  // Navigate to journal and apply search
+  sideNav('p-journal');
+  const jq = document.getElementById('f-jn-q');
+  if (jq) { jq.value = q; applyJournal(); }
+}
+
+/* ── Export PDF ─────────────────────────────────────────────── */
+function exportPDF(section) {
+  const pageMap = { overview: 'home', stats: 'p-stats', today: 'p-today' };
+  if (pageMap[section]) sideNav(pageMap[section]);
+
+  document.body.dataset.printing = section;
+
+  const now = new Date().toLocaleString('fr-FR', {
+    day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+  const labels = {
+    overview: "Vue d'ensemble — Indicateurs clés du portefeuille",
+    stats:    'Statistiques & Anomalies — Analyse globale',
+    today:    "Activité du jour — Suivi des actions",
+  };
+  const lbl = document.getElementById('print-section-label');
+  const dt  = document.getElementById('print-gen-date');
+  const ds  = document.getElementById('print-data-summary');
+  if (lbl) lbl.textContent = labels[section] || 'Rapport CardFlow';
+  if (dt)  dt.textContent  = 'Généré le ' + now;
+  if (ds && typeof D !== 'undefined' && D.rows)
+    ds.textContent = D.rows.length.toLocaleString('fr') + ' événements · ' +
+      (D.cards?.size || 0).toLocaleString('fr') + ' cartes · ' +
+      (D.dates?.length || 0) + ' jours d\'activité';
+
+  const cleanup = () => {
+    delete document.body.dataset.printing;
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  window.print();
+}
 
 /* ── Déverrouillage sidebar au chargement des données ──────── */
 (function() {
@@ -642,6 +771,25 @@ function closeSidebar() {
   obs.observe(viewsEl, { attributes: true, attributeFilter: ['class'] });
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PRINT HEADER/FOOTER (visibles uniquement à l'impression)
+════════════════════════════════════════════════════════════ -->
+<div id="cf-print-header">
+  <div>
+    <div class="print-hdr-brand">Card<strong>Flow</strong></div>
+    <div class="print-hdr-tagline">Outil de pilotage des cartes VISA — Usage interne</div>
+  </div>
+  <div class="print-hdr-right">
+    <div class="print-hdr-section" id="print-section-label">Rapport</div>
+    <div class="print-hdr-date"    id="print-gen-date"></div>
+    <div class="print-hdr-data"    id="print-data-summary"></div>
+  </div>
+</div>
+
+<div id="cf-print-footer">
+  CardFlow &nbsp;·&nbsp; Outil de pilotage des cartes VISA &nbsp;·&nbsp; Données traitées localement &nbsp;·&nbsp; Usage interne confidentiel
+</div>
 
 </body>
 </html>

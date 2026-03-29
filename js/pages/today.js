@@ -100,15 +100,15 @@ function applyToday() {
 /** Génère le HTML d'une ligne du tableau Activité du jour. */
 function rowToday(r) {
   return `<tr>
-    <td class="m">${r.agence}</td>
-    <td class="m">${r.compte}</td>
-    <td class="m">${r.ref}</td>
-    <td class="m">${r.pan}</td>
-    <td>${r.embossage}</td>
-    <td style="color:var(--sub);font-size:11px">${r.libelle}</td>
+    <td class="m">${esc(r.agence)}</td>
+    <td class="m">${esc(r.compte)}</td>
+    <td class="m">${esc(r.ref)}</td>
+    <td class="m">${esc(r.pan)}</td>
+    <td>${esc(r.embossage)}</td>
+    <td style="color:var(--sub);font-size:11px">${esc(r.libelle)}</td>
     <td>${bdg(r.action)}</td>
     <td>${bdg(r.statut)}</td>
     <td class="m" style="color:var(--sub2);font-size:11px">${fH(r.heure)}</td>
-    <td>${r.uti ? `<span class="uti">${r.uti}</span>` : '—'}</td>
+    <td>${r.uti ? `<span class="uti">${esc(r.uti)}</span>` : '—'}</td>
   </tr>`;
 }

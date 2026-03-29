@@ -95,7 +95,7 @@ function renderTimelineEvents(events) {
           <span class="tl-date">${fD(ev.date_d)}</span>
           <span style="color:var(--sub2);font-family:var(--m);font-size:11px">${fH(ev.heure)}</span>
           ${bdg(ev.action)}
-          ${ev.uti ? `<span class="uti">${ev.uti}</span>` : ''}
+          ${ev.uti ? `<span class="uti">${esc(ev.uti)}</span>` : ''}
           ${isLast ? `<span style="font-family:var(--m);font-size:10px;color:var(--gold)">★ dernier jour</span>` : ''}
         </div>
       </div>`;

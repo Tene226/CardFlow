@@ -17,7 +17,7 @@ function esc(s) {
 /** Génère un badge coloré selon le statut */
 function bdg(statut) {
   const [fg, bg] = SC[statut] || ['#4e6a8c', 'rgba(78,106,140,.15)'];
-  return `<span class="bx" style="color:${fg};background:${bg}">${statut || '—'}</span>`;
+  return `<span class="bx" style="color:${fg};background:${bg}">${esc(statut) || '—'}</span>`;
 }
 
 /** Formate une date YYYY/MM/DD → YYYY-MM-DD */
