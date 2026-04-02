@@ -159,7 +159,7 @@ body {
   background: var(--bg);
   color: var(--white);
   font-family: var(--f);
-  font-size: 13.5px;
+  font-size: 14px;
   line-height: 1.5;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -238,8 +238,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   background: rgba(255,255,255,.05);
   border: 1px solid rgba(255,255,255,.08);
@@ -2001,3 +2001,70 @@ td.m { font-family: var(--m); }
   #p-stats .card.g1:nth-child(4) { page-break-before: always; }
   .chart-break { page-break-before: always; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   UI/UX ENHANCEMENTS — accessibility + design refinements
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Skip to content link ──────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--pr);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 0 0 8px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  z-index: 9999;
+  transition: top .2s;
+}
+.skip-link:focus { top: 0; }
+
+/* ─── Focus rings visibles ──────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--pr);
+  outline-offset: 2px;
+}
+
+/* Sur fond sombre (header, sidebar) — focus blanc/crimson contrasté */
+.cf-header :focus-visible,
+.cf-sidebar :focus-visible {
+  outline: 2px solid #FCA5A5;
+  outline-offset: 2px;
+}
+
+/* ─── Fond principal : gradient subtil ─────────────────────── */
+body {
+  background: radial-gradient(ellipse at 60% 0%, #E8EEF8 0%, var(--bg) 55%);
+}
+[data-theme="dark"] body {
+  background: radial-gradient(ellipse at 60% 0%, #0d1930 0%, var(--bg) 60%);
+}
+
+/* ─── Theme toggle : SVG icons ─────────────────────────────── */
+.theme-toggle-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.theme-toggle-ico svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
+}
+
+/* Light mode : affiche soleil, cache lune */
+.theme-toggle-ico .ico-sun  { display: block; }
+.theme-toggle-ico .ico-moon { display: none;  }
+
+/* Dark mode : affiche lune, cache soleil */
+[data-theme-ico="dark"] .ico-sun  { display: none;  }
+[data-theme-ico="dark"] .ico-moon { display: block; }
